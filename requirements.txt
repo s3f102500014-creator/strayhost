@@ -1,0 +1,3 @@
+# No third-party packages are required (Python 3.10+ standard library only).
+# Optional: faster name similarity (values differ slightly from the built-in difflib).
+# rapidfuzz>=3
