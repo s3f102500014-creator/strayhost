@@ -414,6 +414,11 @@ def cmd_score(args: argparse.Namespace) -> int:
     n_true = sum(1 for t, c in true_case.items() if c in CRITICAL_CASES)
     print(f"Critical alerts: {len(crit_idx)} (one correct alert per real high-risk device: {real}; "
           f"duplicate, wrong device or wrong case: {len(crit_idx) - real}); real high-risk devices in the data: {n_true}")
+    # missed: a real high-risk device none of whose records is in any Critical asset
+    alerted = {truth[r] for i in crit_idx for r in pred[i] if r in truth}
+    missed = sorted(t for t, c in true_case.items() if c in CRITICAL_CASES and t not in alerted)
+    print(f"real high-risk devices with no Critical alert at all (missed): {len(missed)}"
+          + (f" ({', '.join(missed)})" if missed else ""))
     return 0
 
 

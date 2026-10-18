@@ -144,6 +144,7 @@ class TestRunWithoutLLM(Base):
         code, stdout, _ = quiet(cli.main, ["score", "--assets", str(out / "assets.json"), "--truth", str(self.data / "truth.csv")])
         self.assertEqual(code, 0)
         self.assertIn("pairwise precision", stdout)
+        self.assertIn("no Critical alert at all (missed):", stdout)
 
     def test_no_llm_flag_overrides_config(self):
         os.environ["CAASM_LLM_BASE_URL"] = "http://127.0.0.1:9/v1"

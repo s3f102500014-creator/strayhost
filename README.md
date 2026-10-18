@@ -79,26 +79,28 @@ python run.py run --input examples/demo --out out --webhook http://127.0.0.1:876
 python run.py score --assets out/assets.json --truth examples/demo/truth.csv
 ```
 
-Without an LLM configured this runs a rules-only baseline (records sharing any identifier are combined without review), so you can see the starting point: on the bundled demo (60 devices plus 12 look-alike decoy devices, 133 records), 37 Critical alerts, of which 13 are not a single correct alert for a real high-risk device. Then configure an LLM and run again.
+Without an LLM configured this runs a rules-only baseline (records sharing any identifier are combined without review), so you can see the starting point: on the bundled demo (60 devices plus 12 look-alike decoy devices, 133 records), 37 Critical alerts, of which 13 are not a single correct alert for a real high-risk device, and 1 real high-risk device gets no Critical alert at all. Then configure an LLM and run again.
 
 Open the console's Tickets tab to see the alerts, the records behind them and the LLM's reasons.
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
-On the bundled demo data (`examples/demo`, 133 records; synthetic):
+On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository. LLM answers vary from run to run, so another run can give slightly different numbers.
 
 | | Rules only (baseline) | StrayHost (LLM decides every combination) |
 |---|---|---|
-| Critical alerts | 37 | **30** |
-| — one correct alert for a real high-risk device | 24 | **25** |
+| Real high-risk devices with no Critical alert at all (missed) | 1 | **0** |
+| Critical alerts | 37 | **31** |
+| — one correct alert for a real high-risk device | 24 | **26** |
 | — duplicate, wrong device or wrong case | 13 | **5** |
-| Pairwise F1 (precision / recall) | 0.667 (0.885 / 0.535) | **0.876 (1.000 / 0.779)** |
-| Pairs of different devices the LLM called "same" | – | **0 of 46** (114 judgements in total) |
-| Alert texts written by the LLM and passing the check | – | 30 of 30 |
+| Pairwise F1 (precision / recall) | 0.667 (0.885 / 0.535) | **0.918 (1.000 / 0.849)** |
+| Pairs of different devices the LLM called "same" | – | **0 of 45** (111 judgements in total) |
+| Pairs of the same device left uncombined | – | 7 of 66 (6 judged "different"; 1 judged "same" but not applied because of the 2-group cap in the look-alike step) |
+| Alert texts written by the LLM and passing the check | – | 31 of 31 |
 
-The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered *"only a shared address matches; the hostnames are completely different"*, kept them apart, and raised the Critical alert.
+The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered (translated from Japanese) *"they have the same shared address (203.0.114.41), but the hostnames are completely different (shdpub-0dab3 vs pub-bd82f); a shared IP alone is not enough"*, kept them apart, and raised the Critical alert.
 
-The 5 remaining imperfect alerts all still fire: 2 duplicates (the LLM kept an old `legacy-` record of the same device separate), 1 wrong case (a missing name was treated as a mismatch; the rules had combined this one correctly by its IP), and 2 where the device's records share no identifier at all, so neither the rules nor StrayHost has a candidate pair for them.
+The 5 remaining imperfect alerts are also imperfect in the baseline. 3 come from old `legacy-` records that the LLM kept separate from the same device (a different IP and, where both records are dated, five years apart): two give a duplicate alert, and one gives a Critical alert for a device whose current records are case A. In the other 2, the device's records share no identifier at all (the EDR record has no hostname, or the ASM record has no domain), so neither the rules nor StrayHost has a candidate pair: the device is alerted, but as case G instead of D or C.
 
 ## Choosing the LLM
 
@@ -157,7 +159,7 @@ python run.py run --input mydata --out out_mine
 python run.py score --assets out_mine/assets.json --truth mydata/truth.csv
 ```
 
-`score` reports pairwise precision / recall / F1, how many high-risk devices were found with the right case, and how many Critical alerts are not "one correct alert for one real high-risk device" (duplicates, wrong device or wrong case).
+`score` reports pairwise precision / recall / F1, how many high-risk devices were found with the right case, how many Critical alerts are not "one correct alert for one real high-risk device" (duplicates, wrong device or wrong case), and how many real high-risk devices got no Critical alert at all.
 
 ## Settings
 
@@ -188,8 +190,8 @@ No real LLM is used: a local fake OpenAI-compatible server and a fake `claude` c
 
 - Candidate pairs are only those sharing an identifier or with similar names; records of one device with nothing in common (e.g. a renamed host with a new IP) are not combined.
 - Asking the LLM about every candidate pair costs more requests than asking only about look-alikes (the demo needs a handful of requests; tens of thousands of records need many).
-- The "no merge without a reason" design has been tried on the demo data only (one run). The 19,235-pair figure above is from our earlier evaluation of the previous design (rules join shared identifiers, the LLM decides look-alikes).
-- Being conservative has a cost: the LLM sometimes keeps old (`legacy-`) records of the same device separate, inconsistently across similar cases, and may treat a missing name as a mismatch. Both produce extra alerts, not hidden ones.
+- The "no merge without a reason" design has been tried on the bundled demo data only. The 19,235-pair figure above is from our earlier evaluation of the previous design (rules join shared identifiers, the LLM decides look-alikes).
+- Being conservative has a cost: the LLM sometimes keeps old (`legacy-`) records of the same device separate, inconsistently across similar cases and across runs, and may treat a missing name as a mismatch. Both produce extra alerts, not hidden ones.
 - Column mapping for specific products is manual for now.
 - Results on synthetic data do not establish accuracy on real networks.
 
