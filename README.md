@@ -63,9 +63,9 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 | Analyst marks a ticket *approved* (known asset) or *false positive*, or adds a suppression rule (name pattern such as `lab-*`) | later alerts for those assets are not sent; the decision is kept in the ticket history |
 | A resolved asset is reported again | the ticket is reopened and e-mailed again |
 | A later run reports the asset as Informational, or no longer reports it | the ticket is resolved automatically |
-| Every 7 days (first after the first run) | report e-mail; the Report tab shows the assets and share per case, open tickets per department, tickets past their deadline and the mean time to resolve |
+| Every 7 days (first after the first run) | report e-mail; the Report tab shows the assets and share per case, the share of healthy assets (B) and of potentially undetected assets (E: in the ledger but not detected), open tickets per department, tickets past their deadline and the mean time to resolve |
 
-Tickets are kept per asset, identified by the ledger asset ID, else the full host or domain name, else the IP address. The Report tab also has buttons to send the digests and the report at once.
+Tickets are kept per asset, identified by the ledger asset ID, else the full host or domain name, else the IP address (if two assets of one run would get the same key, the later one gets a `#2` suffix). The Report tab also has buttons to send the digests and the report at once.
 
 Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent in the background through SMTP when `CAASM_SMTP_HOST` is set (`CAASM_SMTP_PORT` 587 with STARTTLS or 465 with SMTPS, certificates verified; `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM`); otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
 

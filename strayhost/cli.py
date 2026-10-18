@@ -226,6 +226,11 @@ def cmd_run(args: argparse.Namespace) -> int:
             "kept_apart": kept_apart,
             "records": recs_by_src,
         })
+    seen_keys: Counter = Counter()
+    for a in sorted(assets, key=lambda x: x["record_ids"]):   # keys must be unique within a run
+        seen_keys[a["asset_key"]] += 1
+        if seen_keys[a["asset_key"]] > 1:
+            a["asset_key"] += f"#{seen_keys[a['asset_key']]}"
     order = {"Critical": 0, "Important": 1, "Informational": 2}
     assets.sort(key=lambda a: (order.get(a["risk"], 9), a["case"], a["name"]))
 
@@ -415,6 +420,9 @@ def cmd_score(args: argparse.Namespace) -> int:
 def cmd_console(args: argparse.Namespace) -> int:
     from .console import Console, serve
 
+    if not 0 <= args.digest_hour <= 23:
+        print("error: --digest-hour must be 0-23", file=sys.stderr)
+        return 2
     routing = {}
     if args.routing:
         routing = json.loads(Path(args.routing).read_text(encoding="utf-8"))

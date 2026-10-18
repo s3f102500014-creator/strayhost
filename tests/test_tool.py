@@ -546,6 +546,36 @@ class TestConsole(unittest.TestCase):
         self.assertEqual(len(self.c.state["tickets"]), 2)
         self.assertEqual(len(self.c.state["outbox"]), 2)
 
+    def test_malformed_payloads_are_rejected(self):
+        bad = [{"strayhost": "x"},
+               {"strayhost": {"kind": "run_summary", "assets": []}},
+               {"strayhost": {"kind": "run_summary"}},
+               {"strayhost": {"kind": "run_summary", "assets": ["x"]}},
+               {"strayhost": {"kind": "run_summary", "assets": [{"asset": "a", "risk": "Critical"}],
+                              "case_counts": [1]}},
+               {"strayhost": {"kind": "digest", "items": "x"}}]
+        self.c.receive(_alert("ghost-1"))
+        for m in bad:
+            with self.assertRaises(ValueError, msg=m):
+                self.c.receive(m)
+        self.assertEqual(self.t("ghost-1")["status"], "open")   # nothing was resolved
+
+    def test_messages_are_trimmed_and_keep_no_records(self):
+        from strayhost import console
+        for i in range(console.MAX_MESSAGES + 5):
+            self.c.receive({"text": f"m{i}"})
+        self.assertEqual(len(self.c.state["messages"]), console.MAX_MESSAGES)
+        self.c.receive(_alert("ghost-1"))
+        self.assertNotIn("strayhost", self.c.state["messages"][-1])
+
+    def test_rule_applies_to_reopened_ticket(self):
+        tid = self.c.receive(_alert("lab-3"))["ticket"]
+        self.c.act(tid, "approve")
+        self.c.add_rule("lab-*")
+        self.c.act(tid, "reopen")
+        self.assertEqual(self.c.receive(_alert("lab-3"))["event"], "suppressed")
+        self.assertEqual(self.t("lab-3")["status"], "approved")
+
     def test_approved_false_positive_and_rules_are_suppressed(self):
         t1 = self.c.receive(_alert("ghost-1"))["ticket"]
         t2 = self.c.receive(_alert("ghost-2"))["ticket"]
@@ -593,6 +623,8 @@ class TestConsole(unittest.TestCase):
     def test_daily_digest_at_the_digest_hour_once_per_day(self):
         self.c.receive(_digest(("dorm-1", "E", "Sales"), ("shd-1", "F", "")))
         digests = lambda: [m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]
+        self.assertEqual(len(self.c.send_digests(force=True)), 2)   # "send now" keeps the scheduled one
+        self.c.state["outbox"].clear()
         self.assertEqual(sorted(self.c.send_digests()), ["", "Sales"])
         self.assertIn(["sales-it@example.com"], [m["to"] for m in digests()])
         self.assertEqual(self.c.send_digests(), [])          # same day

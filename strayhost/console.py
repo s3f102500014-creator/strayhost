@@ -53,6 +53,7 @@ SUPPRESSED_STATES = ("approved", "false_positive")
 ACTIONS = {"acknowledge": "acknowledged", "resolve": "resolved", "approve": "approved",
            "false_positive": "false_positive", "reopen": "open"}
 ALERT_FIELDS = ("asset", "risk", "case", "title")
+MAX_MESSAGES = 500  # notification feed kept in the state file
 
 
 def _now() -> datetime:
@@ -121,6 +122,7 @@ class Console:
         self.clock = clock
         self.digest_hour = digest_hour
         self.lock = threading.Lock()
+        self.version = 0  # bumped on every change; lets the page skip unchanged polls
         self.state = self._load()
         self._mail_queue: "queue.Queue[int]" = queue.Queue()
         self._pending: List[int] = []
@@ -140,13 +142,17 @@ class Console:
         return base
 
     def _save(self) -> None:
+        self.version += 1
         tmp = self.state_path.with_suffix(".tmp")
         tmp.write_text(json.dumps(self.state, ensure_ascii=False, indent=1), encoding="utf-8")
         tmp.replace(self.state_path)
 
-    def snapshot(self) -> Dict[str, Any]:
+    def snapshot(self, since: Optional[int] = None) -> Dict[str, Any]:
         with self.lock:
+            if since == self.version:
+                return {"version": self.version, "unchanged": True}
             snap = json.loads(json.dumps(self.state))
+            snap["version"] = self.version
         for t in snap["tickets"].values():
             t["due"] = self._due(t)
         return snap
@@ -200,11 +206,13 @@ class Console:
                 print(f"[warn] e-mail failed: {e}", file=sys.stderr)
 
     def _locked(self, fn: Callable[[], Any]) -> Any:
-        with self.lock:
-            self._pending = []
-            out = fn()
-            self._save()
-        self._flush_pending()
+        try:
+            with self.lock:
+                self._pending = []
+                out = fn()
+                self._save()
+        finally:
+            self._flush_pending()
         return out
 
     # -------------------------------------------------------------- tickets
@@ -247,6 +255,9 @@ class Console:
         if t["case"] != case or t["risk"] != risk:
             self._history(t, "case changed", f"{t['case']} ({t['risk']}) -> {case} ({risk})")
             t["case"], t["risk"] = case, risk
+        if rule and t["status"] in OPEN_STATES:
+            t["status"] = "approved"
+            self._history(t, "approved", f"suppression rule '{rule['pattern']}': {rule.get('reason', '')}")
         if t["status"] in SUPPRESSED_STATES or rule:
             return {"ticket": t, "event": "suppressed"}
         if t["status"] == "resolved":
@@ -258,19 +269,32 @@ class Console:
     def receive(self, msg: Dict[str, Any]) -> Dict[str, Any]:
         """Handle one webhook message. Raises ValueError for malformed StrayHost payloads."""
         d = msg.get("strayhost") or {}
+        if not isinstance(d, dict):
+            raise ValueError("'strayhost' must be an object")
         kind = d.get("kind")
+        if kind == "run_summary":
+            assets = d.get("assets")
+            if not isinstance(assets, list) or not assets or not all(
+                    isinstance(a, dict) and isinstance(a.get("asset"), str) and isinstance(a.get("risk"), str)
+                    for a in assets):
+                raise ValueError("run_summary needs a non-empty list of assets with 'asset' and 'risk'")
+            cc = d.get("case_counts", {})
+            if not isinstance(cc, dict) or not all(isinstance(v, int) for v in cc.values()):
+                raise ValueError("run_summary case_counts must map case letters to integers")
         if kind == "alert":
             missing = [f for f in ALERT_FIELDS if not isinstance(d.get(f), str) or not d.get(f)]
             if missing:
                 raise ValueError(f"alert without {', '.join(missing)}")
-        if kind == "digest" and not all(isinstance(i, dict) and i.get("asset") and i.get("case")
-                                        for i in d.get("items", [])):
+        if kind == "digest" and (not isinstance(d.get("items", []), list) or not all(
+                isinstance(i, dict) and isinstance(i.get("asset"), str) and isinstance(i.get("case"), str)
+                for i in d.get("items", []))):
             raise ValueError("digest items need 'asset' and 'case'")
 
         def work():
-            m = dict(msg)
-            m["received"] = _iso(self.clock())
+            m = {"received": _iso(self.clock()), "text": msg.get("text", ""), "kind": kind or "text",
+                 "title": d.get("title", ""), "risk": d.get("risk", "")}   # details live in the tickets
             self.state["messages"].append(m)
+            del self.state["messages"][:-MAX_MESSAGES]
             result: Dict[str, Any] = {"kind": kind or "text"}
             if kind == "alert":
                 r = self._upsert(d, d["risk"])
@@ -377,9 +401,10 @@ class Console:
         def work():
             now = self.clock()
             today = now.date().isoformat()
-            if not force and (self.state["last_digest_day"] == today or now.hour < self.digest_hour):
-                return []
-            self.state["last_digest_day"] = today
+            if not force:
+                if self.state["last_digest_day"] == today or now.hour < self.digest_hour:
+                    return []
+                self.state["last_digest_day"] = today   # "send now" does not replace the scheduled digest
             by_dept: Dict[str, List[Dict[str, Any]]] = {}
             for t in self.state["tickets"].values():
                 if t["risk"] == "Important" and t["status"] in OPEN_STATES:
@@ -428,9 +453,9 @@ class Console:
 
         def minutes_to_resolve(t: Dict[str, Any]) -> Optional[float]:
             res = [h for h in t["history"] if h["action"] in ("resolve", "resolved")]
-            if not res:
+            if t["status"] != "resolved" or not res:   # time from the last (re)open to its resolution
                 return None
-            return (datetime.fromisoformat(res[-1]["time"]) - datetime.fromisoformat(t["created"])).total_seconds() / 60
+            return (datetime.fromisoformat(res[-1]["time"]) - datetime.fromisoformat(t["opened"])).total_seconds() / 60
         done = [m for m in (minutes_to_resolve(t) for t in tickets) if m is not None]
         by_dept: Dict[str, Dict[str, int]] = {}
         for t in tickets:
@@ -439,6 +464,8 @@ class Console:
                 row[t["risk"]] = row.get(t["risk"], 0) + 1
         return {
             "latest_run": last.get("time"), "runs": len(runs), "assets": n, "case_counts": cc, "case_share": share,
+            "healthy_share": share["B"],                 # paper: healthy assets (managed, internal only)
+            "potentially_undetected_share": share["E"],  # paper: in the ledger but not detected
             "managed_with_edr_share": round((cc["A"] + cc["B"]) / n, 3) if n else 0.0,   # in ledger and EDR
             "not_in_ledger_share": round((cc["D"] + cc["F"] + cc["G"]) / n, 3) if n else 0.0,
             "open_tickets": {r: sum(1 for t in tickets if t["status"] in OPEN_STATES and t["risk"] == r)
@@ -459,7 +486,9 @@ class Console:
         lines = [f"StrayHost report ({r['latest_run']}, {r['assets']} assets)", ""]
         for c in "ABCDEFG":
             lines.append(f"  {c} {names[c]}: {r['case_counts'][c]} ({r['case_share'][c]:.1%})")
-        lines += ["", f"In the ledger and running EDR (A+B): {r['managed_with_edr_share']:.1%}",
+        lines += ["", f"Healthy assets (B): {r['healthy_share']:.1%}",
+                  f"Potentially undetected assets (E: in the ledger, not detected): {r['potentially_undetected_share']:.1%}",
+                  f"In the ledger and running EDR (A+B): {r['managed_with_edr_share']:.1%}",
                   f"Not in the ledger (D+F+G): {r['not_in_ledger_share']:.1%}",
                   f"Open tickets: Critical {r['open_tickets']['Critical']}, Important {r['open_tickets']['Important']} "
                   f"(past deadline {r['overdue']}); resolved {r['resolved']}, approved {r['approved']}, "
@@ -525,7 +554,7 @@ function render(){if(!S)return;const L=document.getElementById("list");
     document.getElementById("sd").onclick=()=>post("/api/digests/send",{}).then(()=>poll(true));document.getElementById("sr").onclick=()=>post("/api/report/send",{}).then(()=>poll(true));
     fetch("/api/report").then(r=>r.json()).then(r=>{const cc=r.case_counts||{},sh=r.case_share||{};const N={A:"managed, visible externally",B:"managed, internal only",C:"visible externally without EDR",D:"shadow IT: EDR + external, not in ledger",E:"ledger only, not detected",F:"EDR only, not in ledger",G:"external only, unknown internally"};
     document.getElementById("detail").innerHTML=`<h2>Report</h2><div class="sub">latest run ${esc(r.latest_run||"-")} · ${r.runs} runs</div>
-    <div class="box"><div class="metric"><b>${r.assets}</b>assets</div><div class="metric"><b>${(r.managed_with_edr_share*100).toFixed(1)}%</b>in the ledger and running EDR (A+B)</div><div class="metric"><b>${(r.not_in_ledger_share*100).toFixed(1)}%</b>not in the ledger (D+F+G)</div></div>
+    <div class="box"><div class="metric"><b>${r.assets}</b>assets</div><div class="metric"><b>${(r.healthy_share*100).toFixed(1)}%</b>healthy assets (B)</div><div class="metric"><b>${(r.potentially_undetected_share*100).toFixed(1)}%</b>potentially undetected (E)</div><div class="metric"><b>${(r.managed_with_edr_share*100).toFixed(1)}%</b>in the ledger and running EDR (A+B)</div><div class="metric"><b>${(r.not_in_ledger_share*100).toFixed(1)}%</b>not in the ledger (D+F+G)</div></div>
     <div class="box"><h3>Assets by case (Table I of the ICSPIS 2025 paper)</h3><table><tr><th>case</th><th>situation</th><th>assets</th><th>share</th></tr>${"ABCDEFG".split("").map(c=>`<tr><td>${c}</td><td>${N[c]}</td><td>${cc[c]||0}</td><td>${((sh[c]||0)*100).toFixed(1)}%</td></tr>`).join("")}</table></div>
     <div class="box"><h3>Tickets</h3>open Critical ${r.open_tickets.Critical}, open Important ${r.open_tickets.Important}, past deadline ${r.overdue}, resolved ${r.resolved}, approved ${r.approved}, false positives ${r.false_positives}, suppression rules ${r.rules}${r.mean_minutes_to_resolve!=null?`, mean time to resolve ${r.mean_minutes_to_resolve} min`:""}
     <table><tr><th>department</th><th>Critical</th><th>Important</th></tr>${Object.entries(r.open_by_department).map(([d,v])=>`<tr><td>${esc(d)}</td><td>${v.Critical||0}</td><td>${v.Important||0}</td></tr>`).join("")}</table></div>`})}
@@ -533,7 +562,7 @@ function render(){if(!S)return;const L=document.getElementById("list");
     document.getElementById("ra").onclick=()=>post("/api/rules",{pattern:document.getElementById("rp").value,reason:document.getElementById("rr").value}).then(()=>poll(true));
     L.querySelectorAll(".rm").forEach(b=>b.onclick=()=>post("/api/rules/remove",{pattern:b.dataset.p}).then(()=>poll(true)));
     document.getElementById("detail").innerHTML=`<h2>Suppression rules</h2><div class="sub">Assets whose name matches a rule (* and ? wildcards) are not notified. Matching open tickets are marked approved.</div>`}
-  else{L.innerHTML=S.messages.map((m,i)=>{const d=m.strayhost||{};return `<div class="item ${sel===i?"sel":""}" data-i="${i}"><span class="badge ${esc(d.risk||"")}">${esc(d.risk||d.kind||"")}</span><span class="t">${esc(d.title||String(m.text||"").split("\n")[0])}</span><div class="sub">${esc(m.received)}</div></div>`}).reverse().join("")||`<div class="empty">Waiting for notifications.</div>`;
+  else{L.innerHTML=S.messages.map((m,i)=>{return `<div class="item ${sel===i?"sel":""}" data-i="${i}"><span class="badge ${esc(m.risk||"")}">${esc(m.risk||m.kind||"")}</span><span class="t">${esc(m.title||String(m.text||"").split("\n")[0])}</span><div class="sub">${esc(m.received)}</div></div>`}).reverse().join("")||`<div class="empty">Waiting for notifications.</div>`;
     L.querySelectorAll(".item").forEach(e=>e.onclick=()=>{sel=+e.dataset.i;render()});
     if(sel!=null){const m=S.messages[sel];document.getElementById("detail").innerHTML=`<div class="box"><pre>${esc(m.text)}</pre></div>`}}}
 function showTicket(t){if(!t)return;const d=t.detail||{};
@@ -548,7 +577,7 @@ function showTicket(t){if(!t)return;const d=t.detail||{};
   const D=document.getElementById("detail");D.innerHTML=h;
   D.querySelectorAll("[data-a]").forEach(b=>b.onclick=async()=>{await post(`/api/tickets/${t.id}/action`,{action:b.dataset.a,note:document.getElementById("note").value});poll(true)})}
 function post(url,obj){return fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(obj)})}
-async function poll(once){try{const r=await fetch("/api/state");const s=await r.json();const changed=!S||JSON.stringify(s)!==JSON.stringify(S);S=s;if(changed)render()}catch(e){}if(!once)setTimeout(poll,1500)}
+async function poll(once){try{const r=await fetch("/api/state?v="+(S?S.version:""));const s=await r.json();if(!s.unchanged){S=s;render()}}catch(e){}if(!once)setTimeout(poll,1500)}
 poll();
 </script></body></html>"""
 
@@ -588,8 +617,9 @@ def make_handler(console: Console):
                 return self._send(403, b"forbidden", "text/plain")
             if self.path in ("/", "/index.html"):
                 return self._send(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
-            if self.path == "/api/state":
-                return self._json(200, console.snapshot())
+            if self.path == "/api/state" or self.path.startswith("/api/state?v="):
+                v = self.path.partition("?v=")[2]
+                return self._json(200, console.snapshot(int(v) if v.isdigit() else None))
             if self.path == "/api/report":
                 return self._json(200, console.report())
             self._send(404, b"not found", "text/plain")
@@ -608,7 +638,7 @@ def make_handler(console: Console):
                     return self._send(400, b"bad request: expected {'text': ...}", "text/plain")
                 try:
                     return self._json(200, console.receive(body))
-                except (ValueError, KeyError, TypeError) as e:
+                except Exception as e:  # noqa: BLE001 - malformed payload
                     return self._send(400, f"bad request: {e}".encode(), "text/plain")
             if self.path == "/api/rules":
                 try:
