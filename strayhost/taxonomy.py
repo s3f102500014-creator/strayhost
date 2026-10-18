@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import Dict
 
-RISK_MAP_DEFAULT: Dict[str, str] = {
+RISK_MAP_DEFAULT: Dict[str, str] = {  # risk levels of Aki et al., ICSPIS 2025
+    "C": "Critical",
     "D": "Critical",
-    "F": "Critical",
     "G": "Critical",
-    "B": "Important",
-    "C": "Important",
+    "A": "Important",
     "E": "Important",
-    "A": "Informational",
+    "F": "Important",
+    "B": "Informational",
     "H": "Informational",
 }
 

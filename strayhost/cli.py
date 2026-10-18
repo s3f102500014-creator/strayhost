@@ -23,16 +23,17 @@ from .grouping import build_asset_groups
 from .rule_engine import Coverage, coverage_to_case
 
 SOURCES = ("ledger", "edr", "asm")
+CRITICAL_CASES = tuple(c for c in "ABCDEFG" if taxonomy.case_to_risk(c) == "Critical")  # C, D, G
 NAME_FIELD = {"ledger": "hostname", "edr": "asset_id_or_hostname", "asm": "domain"}
 IP_FIELD = {"ledger": "ip", "edr": "ip", "asm": "public_ip"}
 CASE_TEXT = {
-    "A": "In ledger and EDR, not exposed externally (expected state)",
-    "B": "In ledger and EDR, exposed externally (check vulnerabilities)",
-    "C": "Ledger only: no EDR agent seen (monitoring blind spot)",
-    "D": "In ledger and externally exposed, but no EDR agent",
-    "E": "EDR only: not in the ledger (internal shadow IT)",
-    "F": "EDR and externally exposed, but not in the ledger",
-    "G": "Externally exposed only: not in the ledger, no EDR (owner unknown)",
+    "A": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+    "B": "In ledger and EDR, not externally visible: internal-only asset",
+    "C": "In ledger and externally visible, but no EDR agent: unprotected asset",
+    "D": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+    "E": "Ledger only, not detected: retired or inactive asset",
+    "F": "EDR only, not in the ledger: unmanaged internal asset",
+    "G": "Externally visible only, unknown internally: typical shadow IT",
     "H": "Not observed by any source",
 }
 
@@ -312,7 +313,8 @@ def cmd_synth(args: argparse.Namespace) -> int:
         w = csv.writer(f)
         w.writerow(["record_id", "true_asset", "true_case"])
         for rid, tid in sorted(gt.record_to_asset.items()):
-            w.writerow([rid, tid, gt.true_case_of(tid)])
+            # the generators label devices with their own letters; write the case of Table I
+            w.writerow([rid, tid, coverage_to_case(gen.ROLE_DEFS[gt.true_case_of(tid)].coverage)])
     n = sum(len(records[s]) for s in SOURCES)
     print(f"synthetic data ({args.style}): {gt.n_assets()} devices, {n} records (strength p={args.p}, seed={args.seed}) -> {out}")
     print("This data is generated, not captured from a real network.")
@@ -354,14 +356,14 @@ def cmd_score(args: argparse.Namespace) -> int:
     pred_case = [a["case"] for a in data["assets"]]
     det = Counter()
     for tid, rids in tgroups.items():
-        if true_case[tid] not in ("D", "F", "G"):
+        if true_case[tid] not in CRITICAL_CASES:
             continue
         maj = Counter(rid_to_pred[r] for r in sorted(rids) if r in rid_to_pred).most_common(1)
         ok = bool(maj) and pred_case[maj[0][0]] == true_case[tid]
         det[(true_case[tid], ok)] += 1
     print(f"mode: {data['meta']['mode']}")
     print(f"pairwise precision {prec:.3f}  recall {rec:.3f}  F1 {f1:.3f}  (record pairs placed in the same asset)")
-    for c in ("D", "F", "G"):
+    for c in CRITICAL_CASES:
         n = det[(c, True)] + det[(c, False)]
         if n:
             print(f"case {c} devices found with the correct case: {det[(c, True)]}/{n}")
@@ -379,9 +381,9 @@ def cmd_score(args: argparse.Namespace) -> int:
             continue
         top = max(c for _, c in owners)
         owner = sorted(t for t, c in owners if c == top)[0]  # deterministic tie-break
-        if true_case.get(owner) in ("D", "F", "G") and majority_of.get(owner) == i and pred_case[i] == true_case[owner]:
+        if true_case.get(owner) in CRITICAL_CASES and majority_of.get(owner) == i and pred_case[i] == true_case[owner]:
             real += 1
-    n_true = sum(1 for t, c in true_case.items() if c in ("D", "F", "G"))
+    n_true = sum(1 for t, c in true_case.items() if c in CRITICAL_CASES)
     print(f"Critical alerts: {len(crit_idx)} (one correct alert per real high-risk device: {real}; "
           f"duplicate, wrong device or wrong case: {len(crit_idx) - real}); real high-risk devices in the data: {n_true}")
     return 0

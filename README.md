@@ -35,17 +35,19 @@ The matching prompt tells the model to answer "different" when the evidence is b
 3. **Let the LLM decide** each candidate pair, then the look-alike groups (as above). Only confirmed pairs are combined.
 4. **Classify** each asset by the lists it appears in (no LLM):
 
-| Case | Ledger | EDR | ASM | Meaning | Notification |
-|---|:-:|:-:|:-:|---|---|
-| A | ✓ | ✓ | | expected state | none |
-| B | ✓ | ✓ | ✓ | managed, exposed | digest |
-| C | ✓ | | | no EDR agent seen | digest |
-| **D** | ✓ | | ✓ | **exposed, no EDR agent** | **alert** |
-| E | | ✓ | | not in ledger (internal shadow IT) | digest |
-| **F** | | ✓ | ✓ | **exposed, not in ledger** | **alert** |
-| **G** | | | ✓ | **exposed only, owner unknown** | **alert** |
+The cases and risk levels are those of the three-way reconciliation matrix in Aki et al., "Triad Integration for IT Asset Governance: AI Agent–Driven Convergence of ITAM, ASM, and EDR" (ICSPIS 2025):
 
-5. **Notify:** one alert per Critical asset (D, F, G), written by the LLM from the observed records and checked; one digest for B, C, E. Send them to any Slack-compatible incoming webhook, or to the built-in local inbox.
+| Case | Ledger (ITAM) | EDR | ASM | Situation | Risk | Notification |
+|---|:-:|:-:|:-:|---|---|---|
+| A | ✓ | ✓ | ✓ | managed, visible externally (check vulnerabilities) | Important | daily digest |
+| B | ✓ | ✓ | | managed, internal only | Informational | weekly report |
+| **C** | ✓ | | ✓ | **externally visible without EDR (unprotected)** | **Critical** | **immediate alert** |
+| **D** | | ✓ | ✓ | **not in ledger, seen by EDR and externally (shadow IT)** | **Critical** | **immediate alert** |
+| E | ✓ | | | ledger only, not detected (retired or inactive) | Important | daily digest |
+| F | | ✓ | | not in ledger, seen by EDR (unmanaged internal) | Important | daily digest |
+| **G** | | | ✓ | **externally visible only, unknown internally** | **Critical** | **immediate alert** |
+
+5. **Notify:** one alert per Critical asset (C, D, G), written by the LLM from the observed records and checked; one digest for A, E, F. Send them to any Slack-compatible incoming webhook, or to the built-in local inbox.
 
 ## Quick start
 
@@ -74,7 +76,7 @@ On the bundled demo data (`examples/demo`, 133 records; synthetic):
 | Pairs of different devices the LLM called "same" | – | **0 of 46** (114 judgements in total) |
 | Alert texts written by the LLM and passing the check | – | 30 of 30 |
 
-The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case F). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered *"only a shared address matches; the hostnames are completely different"*, kept them apart, and raised the Critical alert.
+The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered *"only a shared address matches; the hostnames are completely different"*, kept them apart, and raised the Critical alert.
 
 The 5 remaining imperfect alerts all still fire: 2 duplicates (the LLM kept an old `legacy-` record of the same device separate), 1 wrong case (a missing name was treated as a mismatch; the rules had combined this one correctly by its IP), and 2 where the device's records share no identifier at all, so neither the rules nor StrayHost has a candidate pair for them.
 

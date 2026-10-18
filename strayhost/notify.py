@@ -18,12 +18,12 @@ import time
 import urllib.request
 from typing import Any, Callable, Dict, List, Set
 
-URGENT_CASES = ("D", "F", "G")
-DIGEST_CASES = ("B", "C", "E")
+URGENT_CASES = ("C", "D", "G")   # Critical: sent immediately
+DIGEST_CASES = ("A", "E", "F")   # Important: daily digest
 
 ACTION = {
-    "D": "Install or repair the EDR agent on this host, and confirm whether it should be reachable from the Internet.",
-    "F": "Find the owner, register the host in the asset ledger, and confirm whether it should be reachable from the Internet.",
+    "C": "Install or repair the EDR agent on this host, and confirm whether it should be reachable from the Internet.",
+    "D": "Find the owner, register the host in the asset ledger, and confirm whether it should be reachable from the Internet.",
     "G": "Identify who runs this Internet-facing service. If nobody owns it, take it down; otherwise register it and install EDR.",
 }
 

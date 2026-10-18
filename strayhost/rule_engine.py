@@ -9,14 +9,15 @@ from typing import Dict, Tuple
 CoverageVector = Tuple[bool, bool, bool]
 
 _COVERAGE_TO_CASE: Dict[CoverageVector, str] = {
-    (True, True, False): "A",
-    (True, True, True): "B",
-    (True, False, False): "C",
-    (True, False, True): "D",
-    (False, True, False): "E",
-    (False, True, True): "F",
+    # (ITAM ledger, EDR, ASM) -> case, as in Table I of Aki et al., ICSPIS 2025
+    (True, True, True): "A",
+    (True, True, False): "B",
+    (True, False, True): "C",
+    (False, True, True): "D",
+    (True, False, False): "E",
+    (False, True, False): "F",
     (False, False, True): "G",
-    (False, False, False): "H",
+    (False, False, False): "H",  # not observed anywhere; never produced from input records
 }
 
 

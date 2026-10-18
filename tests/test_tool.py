@@ -68,14 +68,15 @@ class Base(unittest.TestCase):
 
 class TestRules(unittest.TestCase):
     def test_all_eight_source_combinations(self):
-        expect = {(1, 1, 0): "A", (1, 1, 1): "B", (1, 0, 0): "C", (1, 0, 1): "D",
-                  (0, 1, 0): "E", (0, 1, 1): "F", (0, 0, 1): "G", (0, 0, 0): "H"}
+        # Table I of the ICSPIS 2025 paper
+        expect = {(1, 1, 1): "A", (1, 1, 0): "B", (1, 0, 1): "C", (0, 1, 1): "D",
+                  (1, 0, 0): "E", (0, 1, 0): "F", (0, 0, 1): "G", (0, 0, 0): "H"}
         for (l, e, a), case in expect.items():
             self.assertEqual(coverage_to_case(Coverage(bool(l), bool(e), bool(a))), case)
 
     def test_high_risk_cases(self):
         crit = {c for c in "ABCDEFGH" if taxonomy.case_to_risk(c) == "Critical"}
-        self.assertEqual(crit, {"D", "F", "G"})
+        self.assertEqual(crit, {"C", "D", "G"})
 
 
 class TestSynth(Base):
@@ -328,7 +329,7 @@ class TestBehaviour(Base):
         assets = self.load(out)["assets"]
         self.assertEqual(len(assets), 1)
         self.assertEqual(assets[0]["name"], "api-12")
-        self.assertEqual(assets[0]["case"], "D")
+        self.assertEqual(assets[0]["case"], "C")
 
     def test_size_cap_limits_chaining(self):
         srv, url = fake_llm_server.start()  # answers "same" for every pair
