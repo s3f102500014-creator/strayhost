@@ -56,16 +56,18 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 | Situation | What the console does |
 |---|---|
 | New Critical asset (C, D, G) | opens a ticket; e-mails the security team at once, and the owning department if the ledger names one |
-| Important assets (A, E, F) | opens tickets; one digest e-mail per department per day |
+| Important assets (A, E, F) | open tickets; every day at `--digest-hour` (default 9), one digest e-mail per department listing its open Important tickets |
 | Informational (B) | counted in the report only |
 | Same asset again while its ticket is open | no new e-mail; the ticket's "seen" count goes up |
-| Ticket not acknowledged within the deadline (`--sla-critical-minutes`, default 1 day; `--sla-important-minutes`, default 3 days) | escalated: e-mail to the escalation address, repeated every further deadline period |
-| Analyst marks a ticket *approved* (known asset) or *false positive* | later alerts for that asset are suppressed |
+| Ticket still unresolved at its deadline (`--sla-critical-minutes`, default 1 day; `--sla-important-minutes`, default 3 days) | escalated: e-mail to the escalation address, again at every further deadline; the deadline is shown on the ticket |
+| Analyst marks a ticket *approved* (known asset) or *false positive*, or adds a suppression rule (name pattern such as `lab-*`) | later alerts for those assets are not sent; the decision is kept in the ticket history |
 | A resolved asset is reported again | the ticket is reopened and e-mailed again |
-| An asset reported in a later run at a lower risk | its ticket is resolved automatically |
-| First run, then every 7 days | report e-mail; the Report tab shows the case counts, the share of assets per situation, open tickets per department and the mean time to resolve |
+| A later run reports the asset as Informational, or no longer reports it | the ticket is resolved automatically |
+| Every 7 days (first after the first run) | report e-mail; the Report tab shows the assets and share per case, open tickets per department, tickets past their deadline and the mean time to resolve |
 
-Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent through SMTP when `CAASM_SMTP_HOST` (and `CAASM_SMTP_PORT`, `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM`) is set; otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
+Tickets are kept per asset, identified by the ledger asset ID, else the full host or domain name, else the IP address. The Report tab also has buttons to send the digests and the report at once.
+
+Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent in the background through SMTP when `CAASM_SMTP_HOST` is set (`CAASM_SMTP_PORT` 587 with STARTTLS or 465 with SMTPS, certificates verified; `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM`); otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
 
 ## Quick start
 

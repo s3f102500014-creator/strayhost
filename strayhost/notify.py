@@ -1,7 +1,8 @@
 """Notifications: what to tell whom, and how.
 
-Critical assets (cases D, F, G) get one alert each, immediately. Important assets
-(B, C, E) are sent as one digest. Informational assets (A) are not sent.
+Case letters and risk levels follow Table I of the ICSPIS 2025 paper. Critical assets
+(cases C, D, G) get one alert each, immediately. Important assets (A, E, F) are sent as
+one digest. Informational assets (B) are not sent.
 
 Alert text is written by the LLM when one is configured, from the observed records
 only. Every IP address and hostname in the LLM's text is checked against those
@@ -151,7 +152,7 @@ def build_notifications(assets: List[Dict[str, Any]], llm_client: Any = None) ->
             except Exception as e:  # noqa: BLE001 - fall back to the template
                 check = {"error": str(e)[:300]}
         out.append({
-            "kind": "alert", "risk": a["risk"], "case": a["case"], "asset": a["name"], "department": department_of(a),
+            "kind": "alert", "risk": a["risk"], "case": a["case"], "asset": a["name"], "asset_key": a.get("asset_key", ""), "department": department_of(a),
             "title": f"{a['risk']}: case {a['case']} — {a['name']}",
             "text": text, "text_source": source, "check": check,
             "why_combined": a["why"], "llm_merges": a["llm_merges"], "kept_apart": a.get("kept_apart", []),
@@ -165,7 +166,7 @@ def build_notifications(assets: List[Dict[str, Any]], llm_client: Any = None) ->
         out.append({"kind": "digest", "risk": "Important", "case": "", "asset": "",
                     "title": f"Important: {len(digest)} assets to review", "text": "\n".join(lines),
                     "text_source": "template", "check": None, "why_combined": "", "llm_merges": [], "records": {},
-                    "items": [{"asset": a["name"], "case": a["case"], "case_meaning": a["case_meaning"],
+                    "items": [{"asset": a["name"], "asset_key": a["asset_key"], "case": a["case"], "case_meaning": a["case_meaning"],
                                "department": department_of(a), "why_combined": a["why"], "records": a["records"]}
                               for a in digest]})
     return out
@@ -177,7 +178,8 @@ def run_summary(assets: List[Dict[str, Any]], meta: Dict[str, Any]) -> Dict[str,
     return {"kind": "run_summary", "risk": "", "title": f"Run summary: {len(assets)} assets", "text":
             "Assets by case: " + ", ".join(f"{c} {n}" for c, n in counts.items()),
             "mode": meta.get("mode"), "case_counts": counts,
-            "assets": [{"asset": a["name"], "case": a["case"], "risk": a["risk"], "department": department_of(a)}
+            "assets": [{"asset": a["name"], "asset_key": a["asset_key"], "case": a["case"], "risk": a["risk"],
+                        "department": department_of(a)}
                        for a in assets]}
 
 

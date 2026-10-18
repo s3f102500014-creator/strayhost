@@ -487,19 +487,31 @@ class TestConsoleHTTP(unittest.TestCase):
         self.assertIn(b"const esc=", page)
 
 
-def _alert(asset, case="G", dept="", risk="Critical"):
+def _alert(asset, case="G", dept="", risk="Critical", key=None):
     return {"text": f"*{risk}: {asset}*", "strayhost": {
-        "kind": "alert", "risk": risk, "case": case, "asset": asset, "department": dept,
-        "title": f"{risk}: case {case} — {asset}", "text": f"[{risk}] Case {case}: {asset}",
+        "kind": "alert", "risk": risk, "case": case, "asset": asset, "asset_key": key or "name:" + asset,
+        "department": dept, "title": f"{risk}: case {case} — {asset}", "text": f"[{risk}] Case {case}: {asset}",
         "records": {"asm": [{"public_ip": "192.0.2.5", "domain": asset + ".example.com"}]},
         "why_combined": "single record", "llm_merges": [], "kept_apart": []}}
+
+
+def _digest(*items):
+    return {"text": "digest", "strayhost": {"kind": "digest", "risk": "Important", "title": "d", "items": [
+        {"asset": a, "asset_key": "name:" + a, "case": c, "case_meaning": "m", "department": d, "records": {}}
+        for a, c, d in items]}}
+
+
+def _summary(assets, counts=None):
+    return {"text": "summary", "strayhost": {"kind": "run_summary", "mode": "x",
+            "case_counts": counts or {}, "assets": [
+                {"asset": a, "asset_key": "name:" + a, "case": c, "risk": r, "department": ""} for a, c, r in assets]}}
 
 
 class TestConsole(unittest.TestCase):
     def setUp(self):
         from datetime import datetime
         from strayhost.console import Console
-        self.now = [datetime(2026, 3, 2, 9, 0, 0)]
+        self.now = [datetime(2026, 3, 2, 9, 30, 0)]
         self.tmp = Path(tempfile.mkdtemp())
         routing = {"security": {"email": "soc@example.com"}, "escalation": {"email": "ciso@example.com"},
                    "departments": {"Sales": {"email": "sales-it@example.com"}}}
@@ -509,6 +521,9 @@ class TestConsole(unittest.TestCase):
     def tick(self, minutes):
         from datetime import timedelta
         self.now[0] += timedelta(minutes=minutes)
+
+    def t(self, name):
+        return self.c.state["tickets"]["name:" + name]
 
     def test_new_critical_creates_ticket_and_mails_security_and_department(self):
         r = self.c.receive(_alert("pub-1", case="C", dept="Sales"))
@@ -521,20 +536,36 @@ class TestConsole(unittest.TestCase):
     def test_repeat_alert_is_not_mailed_again(self):
         self.c.receive(_alert("ghost-1"))
         n = len(self.c.state["outbox"])
-        r = self.c.receive(_alert("ghost-1"))
-        self.assertEqual(r["event"], "updated")
+        self.assertEqual(self.c.receive(_alert("ghost-1"))["event"], "updated")
         self.assertEqual(len(self.c.state["outbox"]), n)
-        self.assertEqual(self.c.state["tickets"]["ghost-1"]["seen_count"], 2)
+        self.assertEqual(self.t("ghost-1")["seen_count"], 2)
 
-    def test_approved_and_false_positive_are_suppressed(self):
+    def test_assets_with_the_same_short_name_get_separate_tickets(self):
+        self.c.receive(_alert("www", key="name:www.a.example"))
+        self.c.receive(_alert("www", key="name:www.b.example"))
+        self.assertEqual(len(self.c.state["tickets"]), 2)
+        self.assertEqual(len(self.c.state["outbox"]), 2)
+
+    def test_approved_false_positive_and_rules_are_suppressed(self):
         t1 = self.c.receive(_alert("ghost-1"))["ticket"]
         t2 = self.c.receive(_alert("ghost-2"))["ticket"]
         self.c.act(t1, "approve", "known test server")
         self.c.act(t2, "false_positive")
+        self.c.add_rule("lab-*", "lab machines")
         n = len(self.c.state["outbox"])
-        self.assertEqual(self.c.receive(_alert("ghost-1"))["event"], "suppressed")
-        self.assertEqual(self.c.receive(_alert("ghost-2"))["event"], "suppressed")
+        for name in ("ghost-1", "ghost-2", "lab-7"):
+            self.assertEqual(self.c.receive(_alert(name))["event"], "suppressed", name)
         self.assertEqual(len(self.c.state["outbox"]), n)
+        self.assertEqual(self.t("lab-7")["status"], "approved")
+        self.c.remove_rule("lab-*")
+        self.assertEqual(self.c.receive(_alert("lab-8"))["event"], "created")
+
+    def test_rule_marks_matching_open_tickets_approved(self):
+        self.c.receive(_alert("lab-1"))
+        self.c.add_rule("LAB-*")
+        self.assertEqual(self.t("lab-1")["status"], "approved")
+        with self.assertRaises(ValueError):
+            self.c.add_rule("  ")
 
     def test_resolved_then_seen_again_is_reopened_and_mailed(self):
         t = self.c.receive(_alert("ghost-1"))["ticket"]
@@ -543,52 +574,64 @@ class TestConsole(unittest.TestCase):
         self.assertEqual(self.c.receive(_alert("ghost-1"))["event"], "reopened")
         self.assertEqual(len(self.c.state["outbox"]), n + 1)
 
-    def test_escalation_after_deadline_unless_acknowledged(self):
+    def test_escalation_of_unresolved_tickets_after_deadline(self):
         a = self.c.receive(_alert("ghost-1"))["ticket"]
         b = self.c.receive(_alert("ghost-2"))["ticket"]
-        self.c.act(b, "acknowledge")
+        c = self.c.receive(_alert("ghost-3"))["ticket"]
+        self.c.act(b, "acknowledge")   # acknowledged but not resolved: still escalated
+        self.c.act(c, "resolve")       # resolved: never escalated
         self.tick(59)
         self.assertEqual(self.c.check_escalations(), [])
         self.tick(2)
-        self.assertEqual(self.c.check_escalations(), [a])
+        self.assertEqual(sorted(self.c.check_escalations()), [a, b])
         self.assertEqual(self.c.state["outbox"][-1]["to"], ["ciso@example.com"])
         self.assertEqual(self.c.check_escalations(), [])  # once per deadline period
         self.tick(60)
-        self.assertEqual(self.c.check_escalations(), [a])
+        self.assertEqual(sorted(self.c.check_escalations()), [a, b])
+        self.assertIsNotNone(self.c.snapshot()["tickets"]["name:ghost-1"]["due"])
 
-    def test_daily_digest_once_per_department_per_day(self):
-        digest = {"text": "digest", "strayhost": {"kind": "digest", "risk": "Important", "title": "d", "items": [
-            {"asset": "dorm-1", "case": "E", "case_meaning": "ledger only", "department": "Sales", "records": {}},
-            {"asset": "shd-1", "case": "F", "case_meaning": "EDR only", "department": "", "records": {}}]}}
-        self.c.receive(digest)
-        mails = [m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]
-        self.assertEqual(len(mails), 2)
-        self.assertIn(["sales-it@example.com"], [m["to"] for m in mails])
-        self.c.receive(digest)  # same day: no new digest
-        self.assertEqual(len([m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]), 2)
-        self.tick(24 * 60)
-        self.c.receive(digest)
-        self.assertEqual(len([m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]), 4)
+    def test_daily_digest_at_the_digest_hour_once_per_day(self):
+        self.c.receive(_digest(("dorm-1", "E", "Sales"), ("shd-1", "F", "")))
+        digests = lambda: [m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]
+        self.assertEqual(sorted(self.c.send_digests()), ["", "Sales"])
+        self.assertIn(["sales-it@example.com"], [m["to"] for m in digests()])
+        self.assertEqual(self.c.send_digests(), [])          # same day
+        self.tick(23 * 60)                                    # next day 08:30, before the digest hour
+        self.assertEqual(self.c.send_digests(), [])
+        self.tick(60)                                         # 09:30
+        self.assertEqual(len(self.c.send_digests()), 2)
+        self.assertEqual(len(digests()), 4)
+        self.assertEqual(len(self.c.send_digests(force=True)), 2)
 
-    def test_run_summary_resolves_assets_no_longer_at_risk_and_reports(self):
-        t = self.c.receive(_alert("pub-1", case="C", dept="Sales"))["ticket"]
-        summary = {"text": "summary", "strayhost": {"kind": "run_summary", "mode": "x",
-                   "case_counts": {"A": 1, "B": 6, "C": 0, "D": 1, "E": 1, "F": 0, "G": 1},
-                   "assets": [{"asset": "pub-1", "case": "B", "risk": "Informational", "department": "Sales"}]}}
-        self.c.receive(summary)
-        self.assertEqual(self.c.state["tickets"]["pub-1"]["status"], "resolved")
-        r = self.c.report()
-        self.assertEqual(r["assets"], 10)
-        self.assertAlmostEqual(r["healthy_ratio"], 0.6)
-        self.assertAlmostEqual(r["shadow_it_ratio"], 0.2)
-        self.assertTrue(any("Weekly report" in m["subject"] for m in self.c.state["outbox"]))
-        self.assertEqual(t, 1)
+    def test_run_summary_resolves_and_report(self):
+        self.c.receive(_alert("pub-1", case="C", dept="Sales"))
+        self.c.receive(_alert("gone-1"))
+        self.c.receive(_alert("still-1"))
+        r = self.c.receive(_summary([("pub-1", "B", "Informational"), ("still-1", "G", "Critical")],
+                                    {"A": 1, "B": 5, "C": 0, "D": 1, "E": 1, "F": 0, "G": 2}))
+        self.assertEqual(self.t("pub-1")["status"], "resolved")
+        self.assertEqual(self.t("gone-1")["status"], "resolved")   # not reported any more
+        self.assertEqual(self.t("still-1")["status"], "open")
+        self.assertEqual(len(r["resolved"]), 2)
+        rep = self.c.report()
+        self.assertEqual(rep["assets"], 10)
+        self.assertAlmostEqual(rep["managed_with_edr_share"], 0.6)
+        self.assertAlmostEqual(rep["not_in_ledger_share"], 0.3)
+        self.assertTrue(self.c.send_report())
+        self.assertFalse(self.c.send_report())                    # weekly
+        self.tick(7 * 24 * 60)
+        self.assertTrue(self.c.send_report())
+        self.assertEqual(len([m for m in self.c.state["outbox"] if "Weekly report" in m["subject"]]), 2)
+
+    def test_malformed_alert_is_rejected(self):
+        with self.assertRaises(ValueError):
+            self.c.receive({"text": "x", "strayhost": {"kind": "alert", "asset": "a"}})
+        self.assertEqual(self.c.state["tickets"], {})
 
     def test_state_survives_restart(self):
         from strayhost.console import Console
         self.c.receive(_alert("ghost-1"))
-        c2 = Console(self.tmp)
-        self.assertIn("ghost-1", c2.state["tickets"])
+        self.assertIn("name:ghost-1", Console(self.tmp).state["tickets"])
 
     def test_smtp_used_when_configured(self):
         import smtplib
@@ -596,10 +639,10 @@ class TestConsole(unittest.TestCase):
         sent = []
 
         class FakeSMTP:
-            def __init__(self, host, port, timeout=0): sent.append(("connect", host, port))
+            def __init__(self, host, port, timeout=0, context=None): sent.append(("connect", host, port))
             def __enter__(self): return self
             def __exit__(self, *a): return False
-            def starttls(self): sent.append(("starttls",))
+            def starttls(self, context=None): sent.append(("starttls", context is not None))
             def login(self, u, p): sent.append(("login", u))
             def send_message(self, m): sent.append(("send", m["To"], m["Subject"]))
         orig = smtplib.SMTP
@@ -613,9 +656,37 @@ class TestConsole(unittest.TestCase):
             for k in ("CAASM_SMTP_HOST", "CAASM_SMTP_USER", "CAASM_SMTP_PASSWORD"):
                 os.environ.pop(k, None)
         self.assertEqual(self.c.state["outbox"][-1]["status"], "sent")
+        self.assertIn(("starttls", True), sent)  # certificate-verifying context
         self.assertIn(("send", "soc@example.com", "[StrayHost] Critical: case G — ghost-9"), sent)
 
-    def test_ticket_action_over_http(self):
+    def test_background_mail_does_not_block(self):
+        import smtplib, time as _t
+        from strayhost import console as cm
+        class SlowSMTP:
+            def __init__(self, *a, **k): _t.sleep(0.5)
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def starttls(self, context=None): pass
+            def send_message(self, m): pass
+        orig = smtplib.SMTP
+        smtplib.SMTP = SlowSMTP
+        os.environ["CAASM_SMTP_HOST"] = "mail.example.com"
+        try:
+            c = cm.Console(self.tmp / "bg", routing={"security": {"email": "soc@example.com"}}, background_mail=True)
+            start = _t.monotonic()
+            for i in range(4):
+                c.receive(_alert(f"g-{i}"))
+            self.assertLess(_t.monotonic() - start, 0.5)        # requests did not wait for SMTP
+            self.assertEqual({m["status"] for m in c.snapshot()["outbox"]}, {"queued"})
+            deadline = _t.monotonic() + 10
+            while _t.monotonic() < deadline and any(m["status"] == "queued" for m in c.snapshot()["outbox"]):
+                _t.sleep(0.1)
+            self.assertEqual({m["status"] for m in c.snapshot()["outbox"]}, {"sent"})
+        finally:
+            smtplib.SMTP = orig
+            os.environ.pop("CAASM_SMTP_HOST", None)
+
+    def test_http_endpoints(self):
         import http.client, threading
         from strayhost.console import serve
         srv = serve(0, self.c, open_browser=False, escalation_interval=3600)
@@ -627,12 +698,17 @@ class TestConsole(unittest.TestCase):
                 h.request("POST", path, body=json.dumps(obj), headers={"Content-Type": ctype})
                 r = h.getresponse(); data = r.read(); h.close(); return r.status, data
             self.assertEqual(post("/hook", _alert("ghost-1"))[0], 200)
-            tid = self.c.state["tickets"]["ghost-1"]["id"]
+            self.assertEqual(post("/hook", {"text": "x", "strayhost": {"kind": "alert"}})[0], 400)
+            tid = self.t("ghost-1")["id"]
             self.assertEqual(post(f"/api/tickets/{tid}/action", {"action": "acknowledge"}, "text/plain")[0], 415)
             self.assertEqual(post(f"/api/tickets/{tid}/action", {"action": "bogus"})[0], 400)
-            self.assertEqual(post(f"/api/tickets/999/action", {"action": "resolve"})[0], 404)
+            self.assertEqual(post("/api/tickets/999/action", {"action": "resolve"})[0], 404)
             self.assertEqual(post(f"/api/tickets/{tid}/action", {"action": "acknowledge", "note": "on it"})[0], 200)
-            self.assertEqual(self.c.state["tickets"]["ghost-1"]["status"], "acknowledged")
+            self.assertEqual(self.t("ghost-1")["status"], "acknowledged")
+            self.assertEqual(post("/api/rules", {"pattern": "lab-*", "reason": "lab"})[0], 200)
+            self.assertEqual(post("/api/rules", {"pattern": ""})[0], 400)
+            self.assertEqual(post("/api/digests/send", {})[0], 200)
+            self.assertEqual(post("/api/report/send", {})[0], 200)
         finally:
             srv.shutdown(); srv.server_close()
 

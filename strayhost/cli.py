@@ -54,6 +54,25 @@ def _shared_identifiers(cluster: Set[str], by_id: Dict[str, dict]) -> List[str]:
     return sorted(k for k, v in count.items() if v >= 2)
 
 
+def _asset_key(cluster: Set[str], by_id: Dict[str, dict]) -> str:
+    """A key that stays the same across runs: the ledger asset ID if any, else the full
+    host or domain name (not just its first label), else the IP address."""
+    ids = sorted(by_id[r].get("asset_id") for r in cluster if r.startswith("ledger_") and by_id[r].get("asset_id"))
+    if ids:
+        return "id:" + ids[0].lower()
+    fields = (("ledger", "fqdn"), ("ledger", "hostname"), ("edr", "asset_id_or_hostname"), ("asm", "domain"))
+    for src, field in fields:
+        names = sorted((by_id[r].get(field) or "").strip().lower() for r in cluster
+                       if r.startswith(src + "_") and (by_id[r].get(field) or "").strip())
+        if names:
+            return "name:" + names[0]
+    for src in SOURCES:
+        ips = sorted(by_id[r].get(IP_FIELD[src]) for r in cluster if r.startswith(src + "_") and by_id[r].get(IP_FIELD[src]))
+        if ips:
+            return "ip:" + ips[0]
+    return "rec:" + sorted(cluster)[0]
+
+
 def _canonical_name(cluster: Set[str], by_id: Dict[str, dict]) -> str:
     """Prefer the ledger hostname, then EDR, then ASM; most frequent within a source."""
     for src in SOURCES:
@@ -196,6 +215,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             recs_by_src[rid.split("_", 1)[0]].append({k: v for k, v in by_id[rid].items()})
         assets.append({
             "name": _canonical_name(cluster, by_id),
+            "asset_key": _asset_key(cluster, by_id),
             "case": case,
             "risk": risk,
             "case_meaning": CASE_TEXT[case],
@@ -240,8 +260,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     (out / "alerts.md").write_text("\n".join(md), encoding="utf-8")
     _write_report(assets, meta, out / "report.html")
     if args.webhook:
-        sent = notify.post_webhook(args.webhook, notes + [notify.run_summary(assets, meta)], delay=args.webhook_delay)
-        print(f"sent {sent}/{len(notes)} notifications to the webhook", file=sys.stderr)
+        outgoing = notes + [notify.run_summary(assets, meta)]
+        sent = notify.post_webhook(args.webhook, outgoing, delay=args.webhook_delay)
+        print(f"sent {sent}/{len(outgoing)} messages to the webhook ({len(notes)} notifications + run summary)",
+              file=sys.stderr)
 
     c = Counter(a["risk"] for a in assets)
     print(f"{len(by_id)} records -> {len(assets)} assets ({mode}); "
@@ -397,7 +419,8 @@ def cmd_console(args: argparse.Namespace) -> int:
     if args.routing:
         routing = json.loads(Path(args.routing).read_text(encoding="utf-8"))
     console = Console(Path(args.data), routing=routing,
-                      sla_minutes={"Critical": args.sla_critical_minutes, "Important": args.sla_important_minutes})
+                      sla_minutes={"Critical": args.sla_critical_minutes, "Important": args.sla_important_minutes},
+                      digest_hour=args.digest_hour, background_mail=True)
     srv = serve(args.port, console, open_browser=not args.no_browser)
     try:
         srv.serve_forever()
@@ -429,9 +452,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         ib.add_argument("--data", default="console_data", help="folder for the console's state file")
         ib.add_argument("--routing", help="JSON file: e-mail addresses of departments, security team, escalation")
         ib.add_argument("--sla-critical-minutes", type=float, default=24 * 60,
-                        help="escalate a Critical ticket not acknowledged within this time (default 1 day)")
+                        help="escalate a Critical ticket still unresolved after this time (default 1 day)")
         ib.add_argument("--sla-important-minutes", type=float, default=72 * 60,
-                        help="escalate an Important ticket not acknowledged within this time (default 3 days)")
+                        help="escalate an Important ticket still unresolved after this time (default 3 days)")
+        ib.add_argument("--digest-hour", type=int, default=9, help="hour of the day for the daily digests (default 9)")
         ib.add_argument("--no-browser", action="store_true")
         ib.set_defaults(func=cmd_console)
 
