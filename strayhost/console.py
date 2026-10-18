@@ -123,6 +123,7 @@ class Console:
         self.digest_hour = digest_hour
         self.lock = threading.Lock()
         self.version = 0  # bumped on every change; lets the page skip unchanged polls
+        self._saved_text = ""
         self.state = self._load()
         self._mail_queue: "queue.Queue[int]" = queue.Queue()
         self._pending: List[int] = []
@@ -142,9 +143,13 @@ class Console:
         return base
 
     def _save(self) -> None:
+        text = json.dumps(self.state, ensure_ascii=False, indent=1)
+        if text == self._saved_text:   # nothing changed: no write, page is not re-rendered
+            return
+        self._saved_text = text
         self.version += 1
         tmp = self.state_path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(self.state, ensure_ascii=False, indent=1), encoding="utf-8")
+        tmp.write_text(text, encoding="utf-8")
         tmp.replace(self.state_path)
 
     def snapshot(self, since: Optional[int] = None) -> Dict[str, Any]:
@@ -285,6 +290,11 @@ class Console:
             missing = [f for f in ALERT_FIELDS if not isinstance(d.get(f), str) or not d.get(f)]
             if missing:
                 raise ValueError(f"alert without {', '.join(missing)}")
+        entries = [d] if kind == "alert" else (d.get("items") if kind == "digest" else d.get("assets")) or []
+        if kind in ("alert", "digest", "run_summary") and isinstance(entries, list):
+            for e in entries:
+                if isinstance(e, dict) and any(not isinstance(e.get(f, ""), str) for f in ("asset_key", "department")):
+                    raise ValueError("'asset_key' and 'department' must be strings")
         if kind == "digest" and (not isinstance(d.get("items", []), list) or not all(
                 isinstance(i, dict) and isinstance(i.get("asset"), str) and isinstance(i.get("case"), str)
                 for i in d.get("items", []))):

@@ -553,12 +553,27 @@ class TestConsole(unittest.TestCase):
                {"strayhost": {"kind": "run_summary", "assets": ["x"]}},
                {"strayhost": {"kind": "run_summary", "assets": [{"asset": "a", "risk": "Critical"}],
                               "case_counts": [1]}},
-               {"strayhost": {"kind": "digest", "items": "x"}}]
+               {"strayhost": {"kind": "digest", "items": "x"}},
+               {"strayhost": {"kind": "alert", "asset": "y", "risk": "Critical", "case": "G", "title": "t",
+                              "asset_key": 5}},
+               {"strayhost": {"kind": "alert", "asset": "y", "risk": "Critical", "case": "G", "title": "t",
+                              "department": ["a"]}},
+               {"strayhost": {"kind": "digest", "items": [{"asset": "y", "case": "E", "department": 1}]}}]
         self.c.receive(_alert("ghost-1"))
         for m in bad:
             with self.assertRaises(ValueError, msg=m):
                 self.c.receive(m)
         self.assertEqual(self.t("ghost-1")["status"], "open")   # nothing was resolved
+        self.assertEqual(len(self.c.state["tickets"]), 1)
+
+    def test_version_changes_only_when_state_changes(self):
+        self.c.receive(_alert("ghost-1"))
+        self.c.tick()                  # today's digest is due: a real change
+        v = self.c.version
+        self.c.tick()
+        self.c.tick()
+        self.assertEqual(self.c.version, v)
+        self.assertEqual(self.c.snapshot(v), {"version": v, "unchanged": True})
 
     def test_messages_are_trimmed_and_keep_no_records(self):
         from strayhost import console
