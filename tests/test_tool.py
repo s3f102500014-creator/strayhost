@@ -439,12 +439,12 @@ class TestClaudeCLI(Base):
         self.assertNotIn("not-a-subscription", stderr)
 
 
-class TestInbox(unittest.TestCase):
+class TestConsoleHTTP(unittest.TestCase):
     def setUp(self):
         import threading
-        from strayhost.inbox import serve
+        from strayhost.console import Console, serve
         self.tmp = Path(tempfile.mkdtemp())
-        self.srv = serve(0, self.tmp / "inbox.jsonl", open_browser=False)
+        self.srv = serve(0, Console(self.tmp), open_browser=False, escalation_interval=3600)
         threading.Thread(target=self.srv.serve_forever, daemon=True).start()
         self.port = self.srv.server_address[1]
 
@@ -465,16 +465,16 @@ class TestInbox(unittest.TestCase):
 
     def test_accepts_json_and_lists_it(self):
         self.assertEqual(self.req("/hook", json.dumps({"text": "hello <b>x</b>"}))[0], 200)
-        status, data = self.req("/api/messages")
+        status, data = self.req("/api/state")
         self.assertEqual(status, 200)
-        self.assertEqual(json.loads(data)[0]["text"], "hello <b>x</b>")
-        self.assertTrue((self.tmp / "inbox.jsonl").exists())
+        self.assertEqual(json.loads(data)["messages"][0]["text"], "hello <b>x</b>")
+        self.assertTrue((self.tmp / "console_state.json").exists())
 
     def test_rejects_non_json_content_type(self):
         self.assertEqual(self.req("/hook", json.dumps({"text": "x"}), ctype="text/plain")[0], 415)
 
     def test_rejects_foreign_host_header(self):
-        self.assertEqual(self.req("/api/messages", host="evil.example:8765")[0], 403)
+        self.assertEqual(self.req("/api/state", host="evil.example:8765")[0], 403)
         self.assertEqual(self.req("/hook", json.dumps({"text": "x"}), host="evil.example")[0], 403)
 
     def test_rejects_bad_payloads(self):
@@ -485,6 +485,156 @@ class TestInbox(unittest.TestCase):
         status, page = self.req("/")
         self.assertEqual(status, 200)
         self.assertIn(b"const esc=", page)
+
+
+def _alert(asset, case="G", dept="", risk="Critical"):
+    return {"text": f"*{risk}: {asset}*", "strayhost": {
+        "kind": "alert", "risk": risk, "case": case, "asset": asset, "department": dept,
+        "title": f"{risk}: case {case} — {asset}", "text": f"[{risk}] Case {case}: {asset}",
+        "records": {"asm": [{"public_ip": "192.0.2.5", "domain": asset + ".example.com"}]},
+        "why_combined": "single record", "llm_merges": [], "kept_apart": []}}
+
+
+class TestConsole(unittest.TestCase):
+    def setUp(self):
+        from datetime import datetime
+        from strayhost.console import Console
+        self.now = [datetime(2026, 3, 2, 9, 0, 0)]
+        self.tmp = Path(tempfile.mkdtemp())
+        routing = {"security": {"email": "soc@example.com"}, "escalation": {"email": "ciso@example.com"},
+                   "departments": {"Sales": {"email": "sales-it@example.com"}}}
+        self.c = Console(self.tmp, routing=routing, sla_minutes={"Critical": 60, "Important": 240},
+                         clock=lambda: self.now[0])
+
+    def tick(self, minutes):
+        from datetime import timedelta
+        self.now[0] += timedelta(minutes=minutes)
+
+    def test_new_critical_creates_ticket_and_mails_security_and_department(self):
+        r = self.c.receive(_alert("pub-1", case="C", dept="Sales"))
+        self.assertEqual(r["event"], "created")
+        mail = self.c.state["outbox"][-1]
+        self.assertEqual(mail["to"], ["soc@example.com", "sales-it@example.com"])
+        self.assertEqual(mail["status"], "not sent")  # SMTP not configured -> kept in the outbox
+        self.assertIn("SMTP not configured", mail["reason"])
+
+    def test_repeat_alert_is_not_mailed_again(self):
+        self.c.receive(_alert("ghost-1"))
+        n = len(self.c.state["outbox"])
+        r = self.c.receive(_alert("ghost-1"))
+        self.assertEqual(r["event"], "updated")
+        self.assertEqual(len(self.c.state["outbox"]), n)
+        self.assertEqual(self.c.state["tickets"]["ghost-1"]["seen_count"], 2)
+
+    def test_approved_and_false_positive_are_suppressed(self):
+        t1 = self.c.receive(_alert("ghost-1"))["ticket"]
+        t2 = self.c.receive(_alert("ghost-2"))["ticket"]
+        self.c.act(t1, "approve", "known test server")
+        self.c.act(t2, "false_positive")
+        n = len(self.c.state["outbox"])
+        self.assertEqual(self.c.receive(_alert("ghost-1"))["event"], "suppressed")
+        self.assertEqual(self.c.receive(_alert("ghost-2"))["event"], "suppressed")
+        self.assertEqual(len(self.c.state["outbox"]), n)
+
+    def test_resolved_then_seen_again_is_reopened_and_mailed(self):
+        t = self.c.receive(_alert("ghost-1"))["ticket"]
+        self.c.act(t, "resolve")
+        n = len(self.c.state["outbox"])
+        self.assertEqual(self.c.receive(_alert("ghost-1"))["event"], "reopened")
+        self.assertEqual(len(self.c.state["outbox"]), n + 1)
+
+    def test_escalation_after_deadline_unless_acknowledged(self):
+        a = self.c.receive(_alert("ghost-1"))["ticket"]
+        b = self.c.receive(_alert("ghost-2"))["ticket"]
+        self.c.act(b, "acknowledge")
+        self.tick(59)
+        self.assertEqual(self.c.check_escalations(), [])
+        self.tick(2)
+        self.assertEqual(self.c.check_escalations(), [a])
+        self.assertEqual(self.c.state["outbox"][-1]["to"], ["ciso@example.com"])
+        self.assertEqual(self.c.check_escalations(), [])  # once per deadline period
+        self.tick(60)
+        self.assertEqual(self.c.check_escalations(), [a])
+
+    def test_daily_digest_once_per_department_per_day(self):
+        digest = {"text": "digest", "strayhost": {"kind": "digest", "risk": "Important", "title": "d", "items": [
+            {"asset": "dorm-1", "case": "E", "case_meaning": "ledger only", "department": "Sales", "records": {}},
+            {"asset": "shd-1", "case": "F", "case_meaning": "EDR only", "department": "", "records": {}}]}}
+        self.c.receive(digest)
+        mails = [m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]
+        self.assertEqual(len(mails), 2)
+        self.assertIn(["sales-it@example.com"], [m["to"] for m in mails])
+        self.c.receive(digest)  # same day: no new digest
+        self.assertEqual(len([m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]), 2)
+        self.tick(24 * 60)
+        self.c.receive(digest)
+        self.assertEqual(len([m for m in self.c.state["outbox"] if "Daily digest" in m["subject"]]), 4)
+
+    def test_run_summary_resolves_assets_no_longer_at_risk_and_reports(self):
+        t = self.c.receive(_alert("pub-1", case="C", dept="Sales"))["ticket"]
+        summary = {"text": "summary", "strayhost": {"kind": "run_summary", "mode": "x",
+                   "case_counts": {"A": 1, "B": 6, "C": 0, "D": 1, "E": 1, "F": 0, "G": 1},
+                   "assets": [{"asset": "pub-1", "case": "B", "risk": "Informational", "department": "Sales"}]}}
+        self.c.receive(summary)
+        self.assertEqual(self.c.state["tickets"]["pub-1"]["status"], "resolved")
+        r = self.c.report()
+        self.assertEqual(r["assets"], 10)
+        self.assertAlmostEqual(r["healthy_ratio"], 0.6)
+        self.assertAlmostEqual(r["shadow_it_ratio"], 0.2)
+        self.assertTrue(any("Weekly report" in m["subject"] for m in self.c.state["outbox"]))
+        self.assertEqual(t, 1)
+
+    def test_state_survives_restart(self):
+        from strayhost.console import Console
+        self.c.receive(_alert("ghost-1"))
+        c2 = Console(self.tmp)
+        self.assertIn("ghost-1", c2.state["tickets"])
+
+    def test_smtp_used_when_configured(self):
+        import smtplib
+        from strayhost import console as cm
+        sent = []
+
+        class FakeSMTP:
+            def __init__(self, host, port, timeout=0): sent.append(("connect", host, port))
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def starttls(self): sent.append(("starttls",))
+            def login(self, u, p): sent.append(("login", u))
+            def send_message(self, m): sent.append(("send", m["To"], m["Subject"]))
+        orig = smtplib.SMTP
+        smtplib.SMTP = FakeSMTP
+        os.environ.update(CAASM_SMTP_HOST="mail.example.com", CAASM_SMTP_USER="u", CAASM_SMTP_PASSWORD="p")
+        try:
+            self.c.mailer = cm.Mailer()
+            self.c.receive(_alert("ghost-9"))
+        finally:
+            smtplib.SMTP = orig
+            for k in ("CAASM_SMTP_HOST", "CAASM_SMTP_USER", "CAASM_SMTP_PASSWORD"):
+                os.environ.pop(k, None)
+        self.assertEqual(self.c.state["outbox"][-1]["status"], "sent")
+        self.assertIn(("send", "soc@example.com", "[StrayHost] Critical: case G — ghost-9"), sent)
+
+    def test_ticket_action_over_http(self):
+        import http.client, threading
+        from strayhost.console import serve
+        srv = serve(0, self.c, open_browser=False, escalation_interval=3600)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            port = srv.server_address[1]
+            def post(path, obj, ctype="application/json"):
+                h = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+                h.request("POST", path, body=json.dumps(obj), headers={"Content-Type": ctype})
+                r = h.getresponse(); data = r.read(); h.close(); return r.status, data
+            self.assertEqual(post("/hook", _alert("ghost-1"))[0], 200)
+            tid = self.c.state["tickets"]["ghost-1"]["id"]
+            self.assertEqual(post(f"/api/tickets/{tid}/action", {"action": "acknowledge"}, "text/plain")[0], 415)
+            self.assertEqual(post(f"/api/tickets/{tid}/action", {"action": "bogus"})[0], 400)
+            self.assertEqual(post(f"/api/tickets/999/action", {"action": "resolve"})[0], 404)
+            self.assertEqual(post(f"/api/tickets/{tid}/action", {"action": "acknowledge", "note": "on it"})[0], 200)
+            self.assertEqual(self.c.state["tickets"]["ghost-1"]["status"], "acknowledged")
+        finally:
+            srv.shutdown(); srv.server_close()
 
 
 class TestStyles(Base):

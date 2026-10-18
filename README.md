@@ -47,21 +47,39 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 | F | | ✓ | | not in ledger, seen by EDR (unmanaged internal) | Important | daily digest |
 | **G** | | | ✓ | **externally visible only, unknown internally** | **Critical** | **immediate alert** |
 
-5. **Notify:** one alert per Critical asset (C, D, G), written by the LLM from the observed records and checked; one digest for A, E, F. Send them to any Slack-compatible incoming webhook, or to the built-in local inbox.
+5. **Notify:** one alert per Critical asset (C, D, G), written by the LLM from the observed records and checked; one digest for A, E, F. Send them to any Slack-compatible incoming webhook, or to the built-in console.
+
+## Console: tickets, routing, escalation, e-mail, reports
+
+`python run.py console --data console_data --routing examples/routing.json` starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations of the paper:
+
+| Situation | What the console does |
+|---|---|
+| New Critical asset (C, D, G) | opens a ticket; e-mails the security team at once, and the owning department if the ledger names one |
+| Important assets (A, E, F) | opens tickets; one digest e-mail per department per day |
+| Informational (B) | counted in the report only |
+| Same asset again while its ticket is open | no new e-mail; the ticket's "seen" count goes up |
+| Ticket not acknowledged within the deadline (`--sla-critical-minutes`, default 1 day; `--sla-important-minutes`, default 3 days) | escalated: e-mail to the escalation address, repeated every further deadline period |
+| Analyst marks a ticket *approved* (known asset) or *false positive* | later alerts for that asset are suppressed |
+| A resolved asset is reported again | the ticket is reopened and e-mailed again |
+| An asset reported in a later run at a lower risk | its ticket is resolved automatically |
+| First run, then every 7 days | report e-mail; the Report tab shows the case counts, the share of assets per situation, open tickets per department and the mean time to resolve |
+
+Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent through SMTP when `CAASM_SMTP_HOST` (and `CAASM_SMTP_PORT`, `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM`) is set; otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
 
 ## Quick start
 
 Python 3.10+. No packages to install.
 
 ```sh
-python run.py inbox                                   # terminal 1: local inbox, opens http://127.0.0.1:8765/
+python run.py console --routing examples/routing.json  # terminal 1: console, opens http://127.0.0.1:8765/
 python run.py run --input examples/demo --out out --webhook http://127.0.0.1:8765/hook   # terminal 2
 python run.py score --assets out/assets.json --truth examples/demo/truth.csv
 ```
 
 Without an LLM configured this runs a rules-only baseline (records sharing any identifier are combined without review), so you can see the starting point: on the bundled demo (60 devices plus 12 look-alike decoy devices, 133 records), 37 Critical alerts, of which 13 are not a single correct alert for a real high-risk device. Then configure an LLM and run again.
 
-The inbox listens on 127.0.0.1 only and accepts JSON posts addressed to `127.0.0.1`/`localhost`.
+Open the console's Tickets tab to see the alerts, the records behind them and the LLM's reasons.
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
@@ -105,9 +123,9 @@ On Windows PowerShell use `$env:NAME="value"`. Keys are read from the environmen
 
 **Data sent to the LLM:** the records of the pairs being judged (and of Critical assets, for alert text), limited to the columns under *Input format*. Other columns are never sent. `--no-llm` forces rules only; `--no-ai-alerts` keeps template alert texts.
 
-**Data sent to a webhook:** the alert title and text. Record details are attached only when the webhook is the local inbox (`127.0.0.1`/`localhost`).
+**Data sent to a webhook:** the alert title and text. Record details are attached only when the webhook is the local console (`127.0.0.1`/`localhost`).
 
-The matching prompt is in Japanese (the prompt used in our evaluation), so the LLM's reasons in `llm_adjudications.jsonl` and in the inbox may be in Japanese; alert texts are in English.
+The matching prompt is in Japanese (the prompt used in our evaluation), so the LLM's reasons in `llm_adjudications.jsonl` and in the console may be in Japanese; alert texts are in English.
 
 ## Outputs (in `--out`)
 

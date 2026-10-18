@@ -117,6 +117,12 @@ def _llm_records_view(asset: Dict[str, Any]) -> Dict[str, List[dict]]:
     return {src: [llm_view(r, src) for r in recs] for src, recs in asset["records"].items()}
 
 
+def department_of(asset: Dict[str, Any]) -> str:
+    """The owning department from the ledger records ("" if the asset is not in the ledger)."""
+    depts = [r.get("owner_dept") for r in asset.get("records", {}).get("ledger", []) if r.get("owner_dept")]
+    return max(set(depts), key=depts.count) if depts else ""
+
+
 def build_notifications(assets: List[Dict[str, Any]], llm_client: Any = None) -> List[Dict[str, Any]]:
     from .llm_client import DailyQuotaExhaustedError
 
@@ -145,7 +151,7 @@ def build_notifications(assets: List[Dict[str, Any]], llm_client: Any = None) ->
             except Exception as e:  # noqa: BLE001 - fall back to the template
                 check = {"error": str(e)[:300]}
         out.append({
-            "kind": "alert", "risk": a["risk"], "case": a["case"], "asset": a["name"],
+            "kind": "alert", "risk": a["risk"], "case": a["case"], "asset": a["name"], "department": department_of(a),
             "title": f"{a['risk']}: case {a['case']} — {a['name']}",
             "text": text, "text_source": source, "check": check,
             "why_combined": a["why"], "llm_merges": a["llm_merges"], "kept_apart": a.get("kept_apart", []),
@@ -158,21 +164,34 @@ def build_notifications(assets: List[Dict[str, Any]], llm_client: Any = None) ->
             lines.append(f"- case {a['case']} {a['name']}: {a['case_meaning']}")
         out.append({"kind": "digest", "risk": "Important", "case": "", "asset": "",
                     "title": f"Important: {len(digest)} assets to review", "text": "\n".join(lines),
-                    "text_source": "template", "check": None, "why_combined": "", "llm_merges": [], "records": {}})
+                    "text_source": "template", "check": None, "why_combined": "", "llm_merges": [], "records": {},
+                    "items": [{"asset": a["name"], "case": a["case"], "case_meaning": a["case_meaning"],
+                               "department": department_of(a), "why_combined": a["why"], "records": a["records"]}
+                              for a in digest]})
     return out
+
+
+def run_summary(assets: List[Dict[str, Any]], meta: Dict[str, Any]) -> Dict[str, Any]:
+    """Sent last: every asset of this run (for the console: closing tickets, weekly report)."""
+    counts = {c: sum(1 for a in assets if a["case"] == c) for c in "ABCDEFG"}
+    return {"kind": "run_summary", "risk": "", "title": f"Run summary: {len(assets)} assets", "text":
+            "Assets by case: " + ", ".join(f"{c} {n}" for c, n in counts.items()),
+            "mode": meta.get("mode"), "case_counts": counts,
+            "assets": [{"asset": a["name"], "case": a["case"], "risk": a["risk"], "department": department_of(a)}
+                       for a in assets]}
 
 
 def post_webhook(url: str, notifications: List[Dict[str, Any]], delay: float = 0.0,
                  log: Callable[[str], None] = lambda m: print(m, file=sys.stderr)) -> int:
     """Send each notification as a Slack-compatible incoming-webhook message ({"text": ...}).
-    Only for a localhost URL (the built-in inbox) are the details (records, reasons) attached."""
+    Only for a localhost URL (the built-in console) are the details (records, reasons) attached."""
     from urllib.parse import urlsplit
 
     local = (urlsplit(url).hostname or "") in ("127.0.0.1", "localhost", "::1")
     sent = 0
     for n in notifications:
         msg: Dict[str, Any] = {"text": f"*{n['title']}*\n{n['text']}"}
-        if local:  # record details only go to the local inbox, never to an external service
+        if local:  # record details only go to the local console, never to an external service
             msg["strayhost"] = n
         body = json.dumps(msg, ensure_ascii=False).encode("utf-8")
         req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"}, method="POST")

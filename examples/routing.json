@@ -1,0 +1,37 @@
+{
+  "security": {
+    "email": "soc@example.com"
+  },
+  "escalation": {
+    "email": "ciso@example.com"
+  },
+  "report": {
+    "email": "it-governance@example.com"
+  },
+  "default_department": {
+    "email": "it-helpdesk@example.com"
+  },
+  "departments": {
+    "Sales": {
+      "email": "sales-it@example.com"
+    },
+    "Engineering": {
+      "email": "eng-it@example.com"
+    },
+    "Finance": {
+      "email": "finance-it@example.com"
+    },
+    "HR": {
+      "email": "hr-it@example.com"
+    },
+    "IT": {
+      "email": "it-ops@example.com"
+    },
+    "Operations": {
+      "email": "ops-it@example.com"
+    },
+    "Marketing": {
+      "email": "marketing-it@example.com"
+    }
+  }
+}

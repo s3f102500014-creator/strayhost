@@ -1,8 +1,9 @@
 """strayhost command line.
 
-  run    reconcile ledger / EDR / ASM CSVs and report unmanaged assets
-  synth  generate a synthetic, labelled dataset (three CSVs + truth.csv)
-  score  compare a run's assets.json with truth.csv
+  run      reconcile ledger / EDR / ASM CSVs and report unmanaged assets
+  synth    generate a synthetic, labelled dataset (three CSVs + truth.csv)
+  score    compare a run's assets.json with truth.csv
+  console  tickets, routing, escalation, e-mail and reports in the browser
 """
 
 from __future__ import annotations
@@ -239,7 +240,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     (out / "alerts.md").write_text("\n".join(md), encoding="utf-8")
     _write_report(assets, meta, out / "report.html")
     if args.webhook:
-        sent = notify.post_webhook(args.webhook, notes, delay=args.webhook_delay)
+        sent = notify.post_webhook(args.webhook, notes + [notify.run_summary(assets, meta)], delay=args.webhook_delay)
         print(f"sent {sent}/{len(notes)} notifications to the webhook", file=sys.stderr)
 
     c = Counter(a["risk"] for a in assets)
@@ -389,10 +390,15 @@ def cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_inbox(args: argparse.Namespace) -> int:
-    from .inbox import serve
+def cmd_console(args: argparse.Namespace) -> int:
+    from .console import Console, serve
 
-    srv = serve(args.port, Path(args.log), open_browser=not args.no_browser)
+    routing = {}
+    if args.routing:
+        routing = json.loads(Path(args.routing).read_text(encoding="utf-8"))
+    console = Console(Path(args.data), routing=routing,
+                      sla_minutes={"Critical": args.sla_critical_minutes, "Important": args.sla_important_minutes})
+    srv = serve(args.port, console, open_browser=not args.no_browser)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
@@ -412,16 +418,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     r.add_argument("--ledger"); r.add_argument("--edr"); r.add_argument("--asm")
     r.add_argument("--out", default="out")
     r.add_argument("--no-llm", action="store_true", help="rules only, even if an LLM is configured")
-    r.add_argument("--webhook", help="Slack-compatible incoming-webhook URL (or the local inbox: http://127.0.0.1:8765/hook)")
+    r.add_argument("--webhook", help="Slack-compatible incoming-webhook URL (or the local console: http://127.0.0.1:8765/hook)")
     r.add_argument("--webhook-delay", type=float, default=0.0, help="seconds between webhook messages")
     r.add_argument("--no-ai-alerts", action="store_true", help="use template alert texts even if an LLM is configured")
     r.set_defaults(func=cmd_run)
 
-    ib = sub.add_parser("inbox", help="local notification inbox (webhook receiver + browser view)")
-    ib.add_argument("--port", type=int, default=8765)
-    ib.add_argument("--log", default="inbox.jsonl")
-    ib.add_argument("--no-browser", action="store_true")
-    ib.set_defaults(func=cmd_inbox)
+    for name in ("console",):
+        ib = sub.add_parser(name, help="tickets, routing, escalation, e-mail and reports in the browser")
+        ib.add_argument("--port", type=int, default=8765)
+        ib.add_argument("--data", default="console_data", help="folder for the console's state file")
+        ib.add_argument("--routing", help="JSON file: e-mail addresses of departments, security team, escalation")
+        ib.add_argument("--sla-critical-minutes", type=float, default=24 * 60,
+                        help="escalate a Critical ticket not acknowledged within this time (default 1 day)")
+        ib.add_argument("--sla-important-minutes", type=float, default=72 * 60,
+                        help="escalate an Important ticket not acknowledged within this time (default 3 days)")
+        ib.add_argument("--no-browser", action="store_true")
+        ib.set_defaults(func=cmd_console)
 
     s = sub.add_parser("synth", help="generate a synthetic labelled dataset")
     s.add_argument("--out", default="synthetic")
