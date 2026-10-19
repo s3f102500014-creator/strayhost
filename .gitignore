@@ -3,5 +3,5 @@ __pycache__/
 out/
 .env
 *.key
-console_data*/
+console_*/
 out_*/

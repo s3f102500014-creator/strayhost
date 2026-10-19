@@ -106,7 +106,7 @@ python3 run.py run --input examples/demo --out out_rules --no-llm
 python3 run.py score --assets out_rules/assets.json --truth examples/demo/truth.csv
 ```
 
-Records that share any identifier are combined without review. The score shows 37 Critical alerts, 13 of them not a single correct alert for a real high-risk device, and 1 real high-risk device with no Critical alert at all (GT-00022, which is `shdpub-0dab3`).
+Records that share any identifier are combined without review. The score shows 37 Critical alerts, 13 of them duplicates, wrong devices or wrong cases, and 1 real high-risk device with no Critical alert at all (GT-00022, which is `shdpub-0dab3`).
 
 ### Step 4: run it yourself with Claude
 
