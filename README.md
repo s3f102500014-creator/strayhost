@@ -26,7 +26,7 @@ Even "obvious" matches fail: a replaced machine inherits the old hostname, devic
 | Every judgement is logged with its reason (`llm_adjudications.jsonl`) | you can audit why two records became one |
 | LLM-written alert text is checked: if it names an IPv4 address or a host/domain name (a name with a digit or a dot) that is not in the records, the text is rejected and the template text is sent | the alert does not cite addresses or hosts that were never observed |
 
-The matching prompt tells the model to answer "different" when the evidence is balanced. In our earlier evaluation on synthetic noise-style data (10 datasets at noise level 0.2, Claude Haiku 4.5), the LLM was asked about 19,235 look-alike pairs that belonged to different devices and answered "same device" for none of them. (In that evaluation, records sharing an identifier were joined by rules without asking the LLM; StrayHost now asks the LLM about those too.)
+The matching prompt tells the model to answer "different" when the evidence is balanced. In our earlier evaluation on synthetic noise-style data (10 datasets at noise level 0.2, Claude Haiku 4.5), the LLM was asked about 19,235 look-alike pairs that belonged to different devices and answered "same device" for none of them. (In that evaluation, records sharing an identifier were joined by rules without asking the LLM, and the prompt was in Japanese; StrayHost now asks the LLM about those pairs too, with an English translation of that prompt.)
 
 ## What it does
 
@@ -85,7 +85,7 @@ Open the console's Tickets tab to see the alerts, the records behind them and th
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
-On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository. LLM answers vary from run to run, so another run can give slightly different numbers.
+On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code at commit 7be4ee3, which used the Japanese matching prompt. LLM answers vary from run to run, so another run can give slightly different numbers.
 
 | | Rules only (baseline) | StrayHost (LLM decides every combination) |
 |---|---|---|
@@ -129,7 +129,7 @@ On Windows PowerShell use `$env:NAME="value"`. Keys are read from the environmen
 
 **Data sent to a webhook:** the alert title and text. Record details are attached only when the webhook is the local console (`127.0.0.1`/`localhost`).
 
-The matching prompt is in Japanese (the prompt used in our evaluation), so the LLM's reasons in `llm_adjudications.jsonl` and in the console may be in Japanese; alert texts are in English.
+The matching prompt is an English translation of the Japanese prompt used in our evaluation; the LLM's reasons and the alert texts are in English.
 
 ## Outputs (in `--out`)
 

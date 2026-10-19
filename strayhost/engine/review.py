@@ -21,15 +21,17 @@ from ..data_io import get_identifiers_from_record
 from . import matchers as _m
 from .matchers import LLMCallBudget, Records, match_llm_adjudicated
 
-LINK_RULES = """# このバッチの追加の判定基準（識別子が一致した記録の組）
-- 各ペアの2つのレコードは、資産ID・ホスト名（大文字小文字とドメイン部分を除いたもの）・IPアドレスの
-  いずれかが一致しています。
-- 資産IDの一致、または表記を揃えたホスト名の完全一致は、明確に矛盾する属性（異なる資産ID・
-  インスタンスID、所有部署の矛盾など）がなければ、それだけで同一資産と判定してよい。
-- IPアドレスだけの一致: 台帳・EDR に記録された機器のアドレスと外部スキャンのアドレスが一致する場合は、
-  矛盾がなければ同一資産と判定してよい。ただし、下の「共有アドレス」に含まれるIPの一致は
-  （NAT などで複数の機器が共有しているため）十分な根拠ではない。他の属性の裏付けがなければ別資産と判定する。
-- 共有アドレス（同じ一覧の中で複数の記録に現れるIP）: {shared}
+LINK_RULES = """# Additional criteria for this batch (pairs of records with a matching identifier)
+- In each pair, the two records share an asset ID, a hostname (ignoring letter case and the domain part)
+  or an IP address.
+- A matching asset ID, or an exact match of the normalised hostname, may on its own be judged the same
+  asset unless an attribute clearly contradicts it (a different asset ID or instance ID, conflicting
+  owning departments, etc.).
+- A match of the IP address only: when the address of a device recorded in the ledger or EDR matches an
+  address from the external scan, it may be judged the same asset if nothing contradicts it. However, a
+  match on an IP listed under "Shared addresses" below is not sufficient evidence (several devices share
+  it, for example through NAT). Without support from other attributes, judge as different assets.
+- Shared addresses (IPs that appear on more than one record of the same list): {shared}
 """
 
 MAX_FULL_CLIQUE = 5  # records sharing one identifier: all pairs up to this many, else a star
@@ -117,7 +119,7 @@ def match_all_by_llm(records: Records, llm_client: Any, out_dir: Path,
         links = links[:cap]
     s1: Dict[str, Any] = {}
     shared = shared_addresses(records)
-    _m.PROMPT_EXTRA = LINK_RULES.format(shared=", ".join(shared) if shared else "なし")
+    _m.PROMPT_EXTRA = LINK_RULES.format(shared=", ".join(shared) if shared else "none")
     try:
         step1 = match_llm_adjudicated(records, llm_client=llm_client, base_groups=singles, candidate_pairs=links,
                                       size_cap="none", audit_log_path=out_dir / "llm_links.jsonl", stats=s1,

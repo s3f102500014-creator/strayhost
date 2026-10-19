@@ -50,56 +50,54 @@ def _build_id_info(records: Records) -> Dict[str, Dict[str, Optional[str]]]:
 
 
 
-_ADJUDICATION_PROMPT_SHARED_HEADER = """あなたはIT資産管理の名寄せ(エンティティ解決)を専門とするセキュリティアナリストです。
-以下に列挙する複数のペアそれぞれについて、レコード群Aとレコード群Bが同一の
-物理・論理資産を指しているかどうかを判定してください。判定基準は各ペアに個別に
-適用してください。
+_ADJUDICATION_PROMPT_SHARED_HEADER = """You are a security analyst specialising in entity resolution for IT asset management.
+For each of the pairs listed below, decide whether record group A and record group B refer to
+the same physical or logical asset. Apply the criteria to each pair separately.
 
-# 前提知識 (企業のIT資産データで一般に起きること)
-- IPアドレスは DHCP の再割当や NAT によって変わりうる。ASM が観測する公開IPは、
-  台帳やEDRが記録する内部IPと一致しないことが多い。
-- ホスト名・FQDN は、同一資産でもソースごとに表記が異なることがある
-  (大文字小文字、ドメイン部分の有無、区切り文字、接尾辞・接頭辞の付加、切り詰め等)。
-- 部署・所有者・IP・時刻などのフィールドは欠損することがある。欠損そのものは
-  同一資産であることの否定材料にも肯定材料にもならない。
-- 資産の状態が変わった後も、古い情報を持つレコードが更新されずに残ることがある。
-- 一方で、名前がよく似ていても別の資産であることもある。名前の類似だけでは
-  同一資産の十分な根拠にならない。
+# Background (what commonly happens in corporate IT asset data)
+- IP addresses can change through DHCP reassignment or NAT. The public IP observed by ASM often
+  does not match the internal IP recorded in the ledger or by EDR.
+- Hostnames and FQDNs of the same asset can be written differently in different sources
+  (letter case, with or without the domain part, separators, added suffixes or prefixes, truncation, etc.).
+- Fields such as department, owner, IP and time can be missing. A missing value is in itself
+  evidence neither for nor against the records being the same asset.
+- After an asset's state changes, records with old information can remain without being updated.
+- On the other hand, assets with very similar names can be different assets. Name similarity
+  alone is not sufficient evidence of the same asset.
 
-# 判定基準
-- 同一資産と判定する: 識別子 (ホスト名・FQDN・ドメイン名、資産ID・インスタンスID、
-  IPアドレス) のいずれかが対応し、それに加えて他の属性 (サブネット、所有部署・
-  所有者、通信先、開放ポート、時刻など) の少なくとも1つが同一資産であることを
-  裏付け、かつ明確に矛盾する属性がない場合。名前が一方または両方で欠損している
-  ときは、名前以外の識別子と属性に同じ基準を適用する。
-- 別資産と判定する: 属性同士が明確に矛盾する場合、または1つの識別子の対応
-  (名前の類似を含む) 以外に同一資産の裏付けがない場合。
-- 証拠が拮抗し判断がつかない場合は、別資産 (same_asset=false) と判定してください。
-  誤って結合すると本来のシャドーIT の発見が消えてしまい、誤って分けた場合
-  (余分なアラートが1件出る) よりも運用上の損失が大きいためです。
-- confidence には、この判定が正しい確率についてのあなたの見積もりを 0.0〜1.0 で
-  記入してください。
+# Criteria
+- Judge as the same asset when one of the identifiers (hostname, FQDN or domain name, asset ID or
+  instance ID, IP address) corresponds, at least one other attribute (subnet, owning department or
+  owner, communication peer, open ports, time, etc.) also supports the same asset, and no attribute
+  clearly contradicts it. When the name is missing on one or both sides, apply the same criteria to
+  the identifiers and attributes other than the name.
+- Judge as different assets when attributes clearly contradict each other, or when there is no
+  support for the same asset other than a single corresponding identifier (including name similarity).
+- If the evidence is balanced and you cannot decide, judge as different assets (same_asset=false).
+  A wrong merge makes a real shadow-IT finding disappear, which costs more in operation than a wrong
+  split (one extra alert).
+- In confidence, give your estimate of the probability that this judgement is correct, from 0.0 to 1.0.
 """
 
 _ADJUDICATION_PROMPT_BATCH_TEMPLATE = (
     _ADJUDICATION_PROMPT_SHARED_HEADER
     + """
-# 候補ペア一覧 ({n_pairs}件)
-以下のJSON配列に列挙された各ペアについて、レコード群Aとレコード群Bが同一資産か
-どうかを判定してください。pair_id は判定結果を入力ペアと対応付けるための識別子
-であり、必ず入力と同じ pair_id を1つずつ出力に含めてください (省略・重複禁止)。
+# Candidate pairs ({n_pairs})
+For each pair in the JSON array below, decide whether record group A and record group B are the
+same asset. pair_id identifies the input pair for the result; include each input pair_id exactly
+once in the output (no omissions, no duplicates).
 
 {pairs_json}
 
-# 出力形式 (厳守。JSON以外の文字列を一切含めないこと。上記の全pair_idを1件ずつ
-# verdicts配列に含めること — 漏れがあってはいけません)
+# Output format (strict. Output JSON only, with no other text. Include every pair_id above
+# exactly once in the verdicts array; none may be missing)
 {{
   "verdicts": [
     {{
-      "pair_id": 上記と対応する整数,
-      "same_asset": true または false,
-      "confidence": 0.0から1.0の確信度 (数値),
-      "evidence": "判定根拠の簡潔な説明"
+      "pair_id": <the integer of the corresponding input pair>,
+      "same_asset": true or false,
+      "confidence": <confidence from 0.0 to 1.0, a number>,
+      "evidence": "<a brief explanation of the reason for the judgement>"
     }}
   ]
 }}
@@ -354,7 +352,7 @@ def _build_batch_prompt(pairs: List[Tuple[int, int]], records: Records, base_gro
     pairs_json = json.dumps(pair_objs, indent=2, ensure_ascii=False)
     text = _batch_template().format(n_pairs=len(pairs), pairs_json=pairs_json)
     if PROMPT_EXTRA:
-        marker = "# 候補ペア一覧"
+        marker = "# Candidate pairs"
         text = text.replace(marker, PROMPT_EXTRA.rstrip() + "\n\n" + marker, 1)
     return text
 
