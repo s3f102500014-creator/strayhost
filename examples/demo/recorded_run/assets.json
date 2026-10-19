@@ -1,0 +1,4469 @@
+{
+  "meta": {
+    "mode": "LLM decides every combination (claude-haiku-4-5-20251001)",
+    "n_records": 133,
+    "n_assets": 83,
+    "n_llm_merges": 57,
+    "n_llm_judgements": 113,
+    "llm_stats": {
+      "links_asked": 46,
+      "lookalikes_asked": 67
+    },
+    "n_notifications": 32,
+    "alert_text": {
+      "llm": 30,
+      "template": 2
+    }
+  },
+  "assets": [
+    {
+      "name": "umpub-14297",
+      "asset_key": "id:ast-40867",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_28",
+        "ledger_30"
+      ],
+      "why": "LLM judged umpub-14297 and umpub-14297 to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.16), asset_id and department present",
+      "llm_merges": [
+        {
+          "names_a": [
+            "umpub-14297"
+          ],
+          "names_b": [
+            "umpub-14297"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.16), asset_id and department present"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "umpub-aa422"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different hostnames (UMPUB-AA422 vs UMPUB-14297), different asset IDs, different instance IDs, different IPs (192.0.2.7 vs 192.0.2.16), different open ports, different vulnerability scores. Only department (Sales) matches; contradicting identifiers indicate different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-1f468"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different asset IDs (AST-40867 vs AST-72459). Different hostnames (UMPUB-14297 vs UMPUB-1F468). Different departments (Sales vs Finance). Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.16",
+            "domain": "umpub-14297.example.com",
+            "discovered_at": "",
+            "open_ports": "22",
+            "vuln_score": "7.4",
+            "_internal_id": "asm_28"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-40867",
+            "hostname": "UMPUB-14297",
+            "ip": "192.0.2.16",
+            "fqdn": "umpub-14297.corp.example.local",
+            "instance_id": "i-d01ee46c",
+            "owner_dept": "Sales",
+            "owner_user": "sal.user4245",
+            "_internal_id": "ledger_30"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-2a2cc",
+      "asset_key": "id:ast-28677",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_1",
+        "ledger_1"
+      ],
+      "why": "LLM judged (a record without a hostname) and umpub-2a2cc to be the same device: IP (192.0.2.2) matches between ASM and ledger; ASM missing domain is not contradictory",
+      "llm_merges": [
+        {
+          "names_a": [],
+          "names_b": [
+            "umpub-2a2cc"
+          ],
+          "step": "link",
+          "confidence": 0.85,
+          "evidence": "IP (192.0.2.2) matches between ASM and ledger; ASM missing domain is not contradictory"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "umpub-aa422"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-2A2CC vs UMPUB-AA422), different asset IDs (AST-28677 vs AST-81754), different IPs (192.0.2.2 vs 192.0.2.7), different open ports, different vulnerability scores, different departments and owners. Clear contradictions across all identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-5c52a"
+          ],
+          "confidence": 0.96,
+          "evidence": "Different asset IDs (AST-28677 vs AST-78756). Different hostnames (UMPUB-2A2CC vs UMPUB-5C52A). Different IPs (192.0.2.2 vs 10.17.0.63). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "pub-25e2c"
+          ],
+          "confidence": 0.95,
+          "evidence": "Group A is public-facing asset (192.0.2.2, UMPUB-2A2CC, Engineering dept). Group B is internal workstation (10.10.2.9, pub-25e2c, EDR only). Different IP address ranges, hostnames, and purpose. No matching identifiers support same asset.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.2",
+            "domain": "",
+            "discovered_at": "2024-01-19T20:38:00Z",
+            "open_ports": "8443",
+            "vuln_score": "8.7",
+            "_internal_id": "asm_1"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-28677",
+            "hostname": "UMPUB-2A2CC",
+            "ip": "192.0.2.2",
+            "fqdn": "umpub-2a2cc.corp.example.local",
+            "instance_id": "",
+            "owner_dept": "Engineering",
+            "owner_user": "eng.user9309",
+            "_internal_id": "ledger_1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-33abf",
+      "asset_key": "id:ast-38206",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_29",
+        "asm_43",
+        "ledger_31"
+      ],
+      "why": "LLM judged umpub-33abf and umpub-33abf to be the same device: Hostname matches exactly (case-insensitive), asset_id present, missing IP in ASM is acceptable; LLM judged umpub-33abf and legacy-umpub-33abf to be the same device: Same domain base (umpub-33abf) with legacy prefix. Identical open ports (22,443,8080) and vulnerability score (4.9). 5-year gap indicates version progression. Strong evidence despite time separation.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "umpub-33abf"
+          ],
+          "names_b": [
+            "umpub-33abf"
+          ],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "Hostname matches exactly (case-insensitive), asset_id present, missing IP in ASM is acceptable"
+        },
+        {
+          "names_a": [
+            "umpub-33abf"
+          ],
+          "names_b": [
+            "legacy-umpub-33abf"
+          ],
+          "step": "lookalike",
+          "confidence": 0.86,
+          "evidence": "Same domain base (umpub-33abf) with legacy prefix. Identical open ports (22,443,8080) and vulnerability score (4.9). 5-year gap indicates version progression. Strong evidence despite time separation."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-umpub-aa422"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (aa422 vs 33abf). Different open port sets (3306,8080 vs 22,443,8080). Different public IP availability. No supporting evidence.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-bd82f"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different domain names (pub-bd82f vs umpub-33abf). Different IP availability. Different open port sets. No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-3d48b"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-3D48B vs UMPUB-33ABF), different asset IDs, different IPs (10.4.9.149 vs 10.11.0.30), different open ports, different vulnerability scores, different departments (IT vs HR). Multiple contradicting identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-12d1f"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (legacy-umpub-33abf vs legacy-pub-12d1f), different vulnerability scores (4.9 vs 3.5), different open ports. No matching identifiers or supporting attributes.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "umpub-33abf.example.com",
+            "discovered_at": "2024-01-24T01:37:00Z",
+            "open_ports": "22,443,8080",
+            "vuln_score": "4.9",
+            "_internal_id": "asm_29"
+          },
+          {
+            "public_ip": "",
+            "domain": "legacy-umpub-33abf.example.com",
+            "discovered_at": "2019-08-28T04:48:00Z",
+            "open_ports": "22,443,8080",
+            "vuln_score": "4.9",
+            "_internal_id": "asm_43"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-38206",
+            "hostname": "UMPUB-33ABF",
+            "ip": "10.11.0.30",
+            "fqdn": "umpub-33abf.corp.example.local",
+            "instance_id": "",
+            "owner_dept": "HR",
+            "owner_user": "",
+            "_internal_id": "ledger_31"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-3d48b",
+      "asset_key": "id:ast-60449",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_15",
+        "ledger_13"
+      ],
+      "why": "LLM judged umpub-3d48b and umpub-3d48b to be the same device: Hostname/domain (umpub-3d48b) match exactly between ASM and ledger; ASM lacking public IP is expected for internal assets",
+      "llm_merges": [
+        {
+          "names_a": [
+            "umpub-3d48b"
+          ],
+          "names_b": [
+            "umpub-3d48b"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname/domain (umpub-3d48b) match exactly between ASM and ledger; ASM lacking public IP is expected for internal assets"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "umpub-33abf"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-3D48B vs UMPUB-33ABF), different asset IDs, different IPs (10.4.9.149 vs 10.11.0.30), different open ports, different vulnerability scores, different departments (IT vs HR). Multiple contradicting identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-1f468"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-3D48B vs UMPUB-1F468), different asset IDs (AST-60449 vs AST-72459), different instance IDs, different departments (IT vs Finance). No matching identifiers.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "umpub-3d48b.example.com",
+            "discovered_at": "2024-01-22T19:17:00Z",
+            "open_ports": "21",
+            "vuln_score": "4.3",
+            "_internal_id": "asm_15"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-60449",
+            "hostname": "UMPUB-3D48B",
+            "ip": "10.4.9.149",
+            "fqdn": "umpub-3d48b.corp.example.local",
+            "instance_id": "i-278d558a",
+            "owner_dept": "IT",
+            "owner_user": "it.user2037",
+            "_internal_id": "ledger_13"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-57496",
+      "asset_key": "id:ast-26359",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_8",
+        "ledger_6"
+      ],
+      "why": "LLM judged (a record without a hostname) and umpub-57496 to be the same device: IP (192.0.2.6) matches between ASM and ledger; ASM missing domain is not contradictory, open_ports align with database/FTP usage",
+      "llm_merges": [
+        {
+          "names_a": [],
+          "names_b": [
+            "umpub-57496"
+          ],
+          "step": "link",
+          "confidence": 0.8,
+          "evidence": "IP (192.0.2.6) matches between ASM and ledger; ASM missing domain is not contradictory, open_ports align with database/FTP usage"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "umpub-1f468"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-57496.vm vs UMPUB-1F468), different asset IDs (AST-26359 vs AST-72459), different instance IDs, different departments (Operations vs Finance). Clear contradictions across all identifiers.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.6",
+            "domain": "",
+            "discovered_at": "2024-01-08T00:41:00Z",
+            "open_ports": "21,22",
+            "vuln_score": "0.4",
+            "_internal_id": "asm_8"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-26359",
+            "hostname": "UMPUB-57496.vm",
+            "ip": "192.0.2.6",
+            "fqdn": "",
+            "instance_id": "i-603a6980",
+            "owner_dept": "Operations",
+            "owner_user": "",
+            "_internal_id": "ledger_6"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-5c52a",
+      "asset_key": "id:ast-78756",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_27",
+        "ledger_27"
+      ],
+      "why": "LLM judged umpub-5c52a and umpub-5c52a to be the same device: Hostname/domain (umpub-5c52a) match exactly between ASM and ledger; ASM lacks public_ip field which is expected for internal assets",
+      "llm_merges": [
+        {
+          "names_a": [
+            "umpub-5c52a"
+          ],
+          "names_b": [
+            "umpub-5c52a"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname/domain (umpub-5c52a) match exactly between ASM and ledger; ASM lacks public_ip field which is expected for internal assets"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "umpub-2a2cc"
+          ],
+          "confidence": 0.96,
+          "evidence": "Different asset IDs (AST-28677 vs AST-78756). Different hostnames (UMPUB-2A2CC vs UMPUB-5C52A). Different IPs (192.0.2.2 vs 10.17.0.63). Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "umpub-5c52a.example.com",
+            "discovered_at": "2024-01-14T04:23:00Z",
+            "open_ports": "21,3389,8443",
+            "vuln_score": "8.5",
+            "_internal_id": "asm_27"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-78756",
+            "hostname": "UMPUB-5C52A",
+            "ip": "10.17.0.63",
+            "fqdn": "umpub-5c52a.corp.example.local",
+            "instance_id": "i-80b0b21d",
+            "owner_dept": "Engineering",
+            "owner_user": "eng.user5748",
+            "_internal_id": "ledger_27"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-a60de-x",
+      "asset_key": "id:ast-81170",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_2",
+        "ledger_2"
+      ],
+      "why": "LLM judged umpub-a60de and umpub-a60de-x to be the same device: Same hostname base (umpub-a60de). Domain names match at base (internal corp.example.local vs external example.com.vm indicates DNS variants). Owner department (Finance) provides context. Minor name suffix (-x) consistent with naming modifications.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "umpub-a60de"
+          ],
+          "names_b": [
+            "umpub-a60de-x"
+          ],
+          "step": "lookalike",
+          "confidence": 0.78,
+          "evidence": "Same hostname base (umpub-a60de). Domain names match at base (internal corp.example.local vs external example.com.vm indicates DNS variants). Owner department (Finance) provides context. Minor name suffix (-x) consistent with naming modifications."
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.114.223",
+            "domain": "umpub-a60de.example.com.vm",
+            "discovered_at": "2024-01-20T00:48:00Z",
+            "open_ports": "22,80,3389",
+            "vuln_score": "0.6",
+            "_internal_id": "asm_2"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-81170",
+            "hostname": "UMPUB-A60DE-x",
+            "ip": "",
+            "fqdn": "umpub-a60de.corp.example.local",
+            "instance_id": "i-6fce352b",
+            "owner_dept": "Finance",
+            "owner_user": "fin.user9298",
+            "_internal_id": "ledger_2"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-aa422",
+      "asset_key": "id:ast-81754",
+      "case": "C",
+      "risk": "Critical",
+      "case_meaning": "In ledger and externally visible, but no EDR agent: unprotected asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_38",
+        "asm_9",
+        "ledger_7"
+      ],
+      "why": "LLM judged umpub-aa422 and umpub-aa422 to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.7), asset_id present; LLM judged umpub-aa422 and legacy-umpub-aa422 to be the same device: Matching hostname (umpub-aa422), identical open ports (3306,8080) and vulnerability score (9.1). Different IPs (192.0.2.7 vs 192.0.2.25) in same subnet, consistent with DHCP reassignment. 'legacy-' prefix indicates historical record of same asset.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "umpub-aa422"
+          ],
+          "names_b": [
+            "umpub-aa422"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.7), asset_id present"
+        },
+        {
+          "names_a": [
+            "umpub-aa422"
+          ],
+          "names_b": [
+            "legacy-umpub-aa422"
+          ],
+          "step": "lookalike",
+          "confidence": 0.8,
+          "evidence": "Matching hostname (umpub-aa422), identical open ports (3306,8080) and vulnerability score (9.1). Different IPs (192.0.2.7 vs 192.0.2.25) in same subnet, consistent with DHCP reassignment. 'legacy-' prefix indicates historical record of same asset."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-umpub-33abf"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (aa422 vs 33abf). Different open port sets (3306,8080 vs 22,443,8080). Different public IP availability. No supporting evidence.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-2a2cc"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-2A2CC vs UMPUB-AA422), different asset IDs (AST-28677 vs AST-81754), different IPs (192.0.2.2 vs 192.0.2.7), different open ports, different vulnerability scores, different departments and owners. Clear contradictions across all identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-14297"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different hostnames (UMPUB-AA422 vs UMPUB-14297), different asset IDs, different instance IDs, different IPs (192.0.2.7 vs 192.0.2.16), different open ports, different vulnerability scores. Only department (Sales) matches; contradicting identifiers indicate different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-1728e"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different public IPs (192.0.2.25 vs 192.0.2.26), different domain names (legacy-umpub-aa422 vs legacy-pub-1728e), different open ports (3306,8080 vs 80,443), different vuln_scores (9.1 vs 9.8). Multiple contradictions confirm different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-bd82f"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (legacy-umpub-aa422 vs legacy-pub-bd82f), different IPs, different open ports (3306,8080 vs 21,3389), different vulnerability scores. No supporting evidence for same asset.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-12d1f"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different public IPs (192.0.2.25 vs 192.0.2.29). Different domain names (aa422 vs 12d1f). No matching identifiers.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.25",
+            "domain": "legacy-umpub-aa422.example.com",
+            "discovered_at": "2019-04-15T13:11:00Z",
+            "open_ports": "3306,8080",
+            "vuln_score": "9.1",
+            "_internal_id": "asm_38"
+          },
+          {
+            "public_ip": "192.0.2.7",
+            "domain": "umpub-aa422.example.com",
+            "discovered_at": "",
+            "open_ports": "3306,8080",
+            "vuln_score": "9.1",
+            "_internal_id": "asm_9"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-81754",
+            "hostname": "UMPUB-AA422",
+            "ip": "192.0.2.7",
+            "fqdn": "umpub-aa422.corp.example.local",
+            "instance_id": "i-5e5bd0f3",
+            "owner_dept": "Sales",
+            "owner_user": "",
+            "_internal_id": "ledger_7"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-0dab3",
+      "asset_key": "name:shdpub-0dab3",
+      "case": "D",
+      "risk": "Critical",
+      "case_meaning": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_13",
+        "edr_14"
+      ],
+      "why": "LLM judged shdpub-0dab3 and shdpub-0dab3 to be the same device: Matching hostname (shdpub-0dab3; '-x' suffix in ASM domain appears to be a formatting artifact). Both from January 2024. Public IP (203.0.114.41) in ASM and private IP (10.11.0.71) in EDR consistent with NAT pattern described in background.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "shdpub-0dab3"
+          ],
+          "names_b": [
+            "shdpub-0dab3"
+          ],
+          "step": "lookalike",
+          "confidence": 0.75,
+          "evidence": "Matching hostname (shdpub-0dab3; '-x' suffix in ASM domain appears to be a formatting artifact). Both from January 2024. Public IP (203.0.114.41) in ASM and private IP (10.11.0.71) in EDR consistent with NAT pattern described in background."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-bd82f"
+          ],
+          "confidence": 0.95,
+          "evidence": "Both ASM records share only the shared IP address (203.0.114.41), but have completely different domains (shdpub-0dab3 vs pub-bd82f). Shared IP alone is insufficient evidence without other matching identifiers",
+          "step": "link"
+        },
+        {
+          "other": [
+            "shdpub-f90f3"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (shdpub-f90f3 vs shdpub-0dab3), different IPs (192.0.2.3 vs 203.0.114.41), different destination FQDNs. No supporting evidence beyond hostname dissimilarity.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.114.41",
+            "domain": "shdpub-0dab3.example.com-x",
+            "discovered_at": "2024-01-04T05:24:00Z",
+            "open_ports": "21,8443",
+            "vuln_score": "",
+            "_internal_id": "asm_13"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-0dab3",
+            "ip": "10.11.0.71",
+            "observed_at": "2024-01-15T00:17:00Z",
+            "dest_ip": "10.5.6.86",
+            "dest_fqdn": "peer-68557.corp.example.local",
+            "_internal_id": "edr_14"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-2edd4",
+      "asset_key": "name:shdpub-2edd4",
+      "case": "D",
+      "risk": "Critical",
+      "case_meaning": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_17",
+        "edr_17"
+      ],
+      "why": "LLM judged shdpub-2edd4 and shdpub-2edd4 to be the same device: IP (192.0.2.11) and hostname (shdpub-2edd4) match exactly between ASM and EDR records",
+      "llm_merges": [
+        {
+          "names_a": [
+            "shdpub-2edd4"
+          ],
+          "names_b": [
+            "shdpub-2edd4"
+          ],
+          "step": "link",
+          "confidence": 0.98,
+          "evidence": "IP (192.0.2.11) and hostname (shdpub-2edd4) match exactly between ASM and EDR records"
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.11",
+            "domain": "shdpub-2edd4.example.com.vm",
+            "discovered_at": "2024-01-11T01:27:00Z",
+            "open_ports": "8443",
+            "vuln_score": "0.1",
+            "_internal_id": "asm_17"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-2edd4",
+            "ip": "192.0.2.11",
+            "observed_at": "",
+            "dest_ip": "10.3.1.215",
+            "dest_fqdn": "peer-25957.corp.example.local",
+            "_internal_id": "edr_17"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-61795",
+      "asset_key": "name:shdpub-61795",
+      "case": "D",
+      "risk": "Critical",
+      "case_meaning": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_4",
+        "edr_4",
+        "edr_41"
+      ],
+      "why": "LLM judged shdpub-61795 and shdpub-61795 to be the same device: Hostname matches (shdpub-61795), IPs differ (203.0.114.32 vs 10.14.6.156) consistent with NAT/external IP scenario described in background; LLM judged shdpub-61795 and shdpub-61795-legacy to be the same device: Matching hostname core (shdpub-61795), sequential private IPs in same subnet (10.14.6.156 vs 10.14.6.157), identical destination peer (10.1.3.204). 'legacy-' suffix and temporal gap (2019 vs 2024) indicate historical record of same asset.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "shdpub-61795"
+          ],
+          "names_b": [
+            "shdpub-61795"
+          ],
+          "step": "link",
+          "confidence": 0.8,
+          "evidence": "Hostname matches (shdpub-61795), IPs differ (203.0.114.32 vs 10.14.6.156) consistent with NAT/external IP scenario described in background"
+        },
+        {
+          "names_a": [
+            "shdpub-61795"
+          ],
+          "names_b": [
+            "shdpub-61795-legacy"
+          ],
+          "step": "lookalike",
+          "confidence": 0.8,
+          "evidence": "Matching hostname core (shdpub-61795), sequential private IPs in same subnet (10.14.6.156 vs 10.14.6.157), identical destination peer (10.1.3.204). 'legacy-' suffix and temporal gap (2019 vs 2024) indicate historical record of same asset."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-shdpub-8ac57",
+            "shdpub-8ac57-legacy"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different hostnames (shdpub-8ac57 vs shdpub-61795) with distinct numeric identifiers. Different private IPs despite one legacy-tagged entry. Hostnames are clearly different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.114.32",
+            "domain": "shdpub-61795.example.com",
+            "discovered_at": "2024-01-20T00:00:00Z",
+            "open_ports": "22,80",
+            "vuln_score": "0.1",
+            "_internal_id": "asm_4"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-61795",
+            "ip": "10.14.6.156",
+            "observed_at": "2024-01-06T22:33:00Z",
+            "dest_ip": "10.1.3.204",
+            "dest_fqdn": "",
+            "_internal_id": "edr_4"
+          },
+          {
+            "asset_id_or_hostname": "shdpub-61795-legacy",
+            "ip": "10.14.6.157",
+            "observed_at": "2019-05-26T12:00:00Z",
+            "dest_ip": "10.1.3.204",
+            "dest_fqdn": "",
+            "_internal_id": "edr_41"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-8ac57-legacy",
+      "asset_key": "name:shdpub-8ac57",
+      "case": "D",
+      "risk": "Critical",
+      "case_meaning": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_37",
+        "asm_5",
+        "edr_42",
+        "edr_7"
+      ],
+      "why": "LLM judged shdpub-8ac57 and shdpub-8ac57 to be the same device: Hostname matches (shdpub-8ac57), IP matches exactly (192.0.2.4), open ports listed provide additional support; LLM judged legacy-shdpub-8ac57 and shdpub-8ac57-legacy to be the same device: IP (192.0.2.24) and normalized hostname (shdpub-8ac57) match; legacy/shdpub prefix variations are common naming conventions; LLM judged shdpub-8ac57 and legacy-shdpub-8ac57/shdpub-8ac57-legacy to be the same device: Same hostname base (shdpub-8ac57). Identical open ports (21) and vulnerability score (8.5). Same destination peer (peer-90248). Legacy prefix and 5-year gap (2019 vs 2024) indicate old vs new version of same asset.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "shdpub-8ac57"
+          ],
+          "names_b": [
+            "shdpub-8ac57"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (shdpub-8ac57), IP matches exactly (192.0.2.4), open ports listed provide additional support"
+        },
+        {
+          "names_a": [
+            "legacy-shdpub-8ac57"
+          ],
+          "names_b": [
+            "shdpub-8ac57-legacy"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "IP (192.0.2.24) and normalized hostname (shdpub-8ac57) match; legacy/shdpub prefix variations are common naming conventions"
+        },
+        {
+          "names_a": [
+            "shdpub-8ac57"
+          ],
+          "names_b": [
+            "legacy-shdpub-8ac57",
+            "shdpub-8ac57-legacy"
+          ],
+          "step": "lookalike",
+          "confidence": 0.82,
+          "evidence": "Same hostname base (shdpub-8ac57). Identical open ports (21) and vulnerability score (8.5). Same destination peer (peer-90248). Legacy prefix and 5-year gap (2019 vs 2024) indicate old vs new version of same asset."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-shdpub-f0c02"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different IPs (192.0.2.24 vs 192.0.2.28), different domain names (legacy-shdpub-8ac57 vs legacy-shdpub-f0c02), different open ports (21 vs 22,8443), different vuln_scores (8.5 vs 6.1). Multiple contradicting attributes confirm different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "shdpub-61795-legacy"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different hostnames (shdpub-8ac57 vs shdpub-61795) with distinct numeric identifiers. Different private IPs despite one legacy-tagged entry. Hostnames are clearly different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.24",
+            "domain": "legacy-shdpub-8ac57.example.com",
+            "discovered_at": "2019-02-03T16:50:00Z",
+            "open_ports": "21",
+            "vuln_score": "8.5",
+            "_internal_id": "asm_37"
+          },
+          {
+            "public_ip": "192.0.2.4",
+            "domain": "shdpub-8ac57.example.com",
+            "discovered_at": "2024-01-09T07:02:00Z",
+            "open_ports": "21",
+            "vuln_score": "8.5",
+            "_internal_id": "asm_5"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-8ac57-legacy",
+            "ip": "192.0.2.24",
+            "observed_at": "2019-11-04T15:29:00Z",
+            "dest_ip": "10.8.2.61",
+            "dest_fqdn": "peer-90248.corp.example.local",
+            "_internal_id": "edr_42"
+          },
+          {
+            "asset_id_or_hostname": "shdpub-8ac57",
+            "ip": "192.0.2.4",
+            "observed_at": "2024-01-14T18:19:00Z",
+            "dest_ip": "10.8.2.61",
+            "dest_fqdn": "peer-90248.corp.example.local",
+            "_internal_id": "edr_7"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-f0c02",
+      "asset_key": "name:shdpub-f0c02.vm",
+      "case": "D",
+      "risk": "Critical",
+      "case_meaning": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_32",
+        "edr_33"
+      ],
+      "why": "LLM judged shdpub-f0c02 and shdpub-f0c02 to be the same device: Hostname matches (case-insensitive, ignoring .vm suffix), IP matches exactly (192.0.2.19)",
+      "llm_merges": [
+        {
+          "names_a": [
+            "shdpub-f0c02"
+          ],
+          "names_b": [
+            "shdpub-f0c02"
+          ],
+          "step": "link",
+          "confidence": 0.93,
+          "evidence": "Hostname matches (case-insensitive, ignoring .vm suffix), IP matches exactly (192.0.2.19)"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-shdpub-f0c02"
+          ],
+          "confidence": 0.75,
+          "evidence": "Group A consolidated to IP 192.0.2.19, Group B to 192.0.2.28. Different IPs and domain names (with legacy prefix in B). While identical open ports and vuln_score suggest relationship, primary identifiers do not match sufficiently to conclude same asset.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "shdpub-f90f3"
+          ],
+          "confidence": 0.99,
+          "evidence": "Different public IPs (192.0.2.3 vs 192.0.2.19), different domain names (shdpub-f90f3 vs shdpub-f0c02), different open ports (none vs 22,8443). Primary identifiers clearly distinguish these as different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.19",
+            "domain": "shdpub-f0c02.example.com",
+            "discovered_at": "2024-01-07T21:20:00Z",
+            "open_ports": "22,8443",
+            "vuln_score": "6.1",
+            "_internal_id": "asm_32"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-f0c02.vm",
+            "ip": "192.0.2.19",
+            "observed_at": "",
+            "dest_ip": "",
+            "dest_fqdn": "peer-91579.corp.example.local",
+            "_internal_id": "edr_33"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-f90f3",
+      "asset_key": "name:shdpub-f90f3.vm",
+      "case": "D",
+      "risk": "Critical",
+      "case_meaning": "EDR and externally visible, but not in the ledger: shadow IT, high risk",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_3",
+        "edr_2"
+      ],
+      "why": "LLM judged shdpub-f90f3 and shdpub-f90f3 to be the same device: IP (192.0.2.3) and hostname (shdpub-f90f3) match; .vm suffix variation is typical for hypervisor guests",
+      "llm_merges": [
+        {
+          "names_a": [
+            "shdpub-f90f3"
+          ],
+          "names_b": [
+            "shdpub-f90f3"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "IP (192.0.2.3) and hostname (shdpub-f90f3) match; .vm suffix variation is typical for hypervisor guests"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "shdpub-0dab3"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (shdpub-f90f3 vs shdpub-0dab3), different IPs (192.0.2.3 vs 203.0.114.41), different destination FQDNs. No supporting evidence beyond hostname dissimilarity.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "shdpub-f0c02"
+          ],
+          "confidence": 0.99,
+          "evidence": "Different public IPs (192.0.2.3 vs 192.0.2.19), different domain names (shdpub-f90f3 vs shdpub-f0c02), different open ports (none vs 22,8443). Primary identifiers clearly distinguish these as different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.3",
+            "domain": "shdpub-f90f3.example.com",
+            "discovered_at": "2024-01-02T18:30:00Z",
+            "open_ports": "",
+            "vuln_score": "8.4",
+            "_internal_id": "asm_3"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-f90f3.vm",
+            "ip": "192.0.2.3",
+            "observed_at": "2024-01-28T11:42:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-00009.corp.example.local",
+            "_internal_id": "edr_2"
+          }
+        ]
+      }
+    },
+    {
+      "name": "192.0.2.10",
+      "asset_key": "ip:192.0.2.10",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_14"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shdpub-3fb71"
+          ],
+          "confidence": 0.75,
+          "evidence": "Only identifier match is IP (192.0.2.10), hostnames are completely different (none vs shdpub-3fb71), insufficient support beyond single identifier",
+          "step": "link"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.10",
+            "domain": "",
+            "discovered_at": "2024-01-22T21:34:00Z",
+            "open_ports": "3306,8443",
+            "vuln_score": "8.0",
+            "_internal_id": "asm_14"
+          }
+        ]
+      }
+    },
+    {
+      "name": "192.0.2.21",
+      "asset_key": "ip:192.0.2.21",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_34"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.21",
+            "domain": "",
+            "discovered_at": "2024-01-18T09:36:00Z",
+            "open_ports": "",
+            "vuln_score": "4.0",
+            "_internal_id": "asm_34"
+          }
+        ]
+      }
+    },
+    {
+      "name": "203.0.113.67",
+      "asset_key": "ip:203.0.113.67",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_23"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.113.67",
+            "domain": "",
+            "discovered_at": "2024-01-25T16:53:00Z",
+            "open_ports": "22,443,3389",
+            "vuln_score": "7.1",
+            "_internal_id": "asm_23"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-0b13f",
+      "asset_key": "name:ext-0b13f.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_20"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "ext-0b13f.example.com",
+            "discovered_at": "2024-01-06T09:52:00Z",
+            "open_ports": "443,8443",
+            "vuln_score": "2.1",
+            "_internal_id": "asm_20"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-0baa2",
+      "asset_key": "name:ext-0baa2.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_24",
+        "asm_42"
+      ],
+      "why": "LLM judged ext-0baa2 and legacy-ext-0baa2 to be the same device: Same domain base (ext-0baa2) with legacy prefix. Identical open ports (443) and vulnerability score (8.7). Sequential public IPs (192.0.2.14 vs 192.0.2.27). 5-year gap suggests version progression.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "ext-0baa2"
+          ],
+          "names_b": [
+            "legacy-ext-0baa2"
+          ],
+          "step": "lookalike",
+          "confidence": 0.8,
+          "evidence": "Same domain base (ext-0baa2) with legacy prefix. Identical open ports (443) and vulnerability score (8.7). Sequential public IPs (192.0.2.14 vs 192.0.2.27). 5-year gap suggests version progression."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-ext-da2dd"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different public IPs (203.0.113.100 vs 192.0.2.27), different domain names (legacy-ext-da2dd vs legacy-ext-0baa2), different open ports, different vuln_scores (9.0 vs 8.7). Multiple contradicting attributes confirm different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.14",
+            "domain": "ext-0baa2.example.com",
+            "discovered_at": "2024-01-15T15:31:00Z",
+            "open_ports": "443",
+            "vuln_score": "8.7",
+            "_internal_id": "asm_24"
+          },
+          {
+            "public_ip": "192.0.2.27",
+            "domain": "legacy-ext-0baa2.example.com",
+            "discovered_at": "2019-01-29T14:14:00Z",
+            "open_ports": "443",
+            "vuln_score": "8.7",
+            "_internal_id": "asm_42"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-24d97",
+      "asset_key": "name:ext-24d97.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_25"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.15",
+            "domain": "ext-24d97.example.com",
+            "discovered_at": "",
+            "open_ports": "443",
+            "vuln_score": "8.7",
+            "_internal_id": "asm_25"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-3bf90",
+      "asset_key": "name:ext-3bf90.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_6"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.5",
+            "domain": "ext-3bf90.example.com",
+            "discovered_at": "2024-01-29T13:32:00Z",
+            "open_ports": "",
+            "vuln_score": "2.7",
+            "_internal_id": "asm_6"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-6825f",
+      "asset_key": "name:ext-6825f.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_33"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.20",
+            "domain": "ext-6825f.example.com",
+            "discovered_at": "2024-01-03T03:22:00Z",
+            "open_ports": "21",
+            "vuln_score": "7.8",
+            "_internal_id": "asm_33"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-70e03",
+      "asset_key": "name:ext-70e03.example.com-x",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_7"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "ext-70e03.example.com-x",
+            "discovered_at": "",
+            "open_ports": "443,3306",
+            "vuln_score": "5.2",
+            "_internal_id": "asm_7"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-b7948",
+      "asset_key": "name:ext-b7948.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_31"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "ext-b9948"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (ext-b7948 vs ext-b9948), different IPs (192.0.2.18 vs 192.0.2.23), different vulnerability scores (4.9 vs 2.0). Name similarity alone is insufficient; contradicting attributes indicate different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.18",
+            "domain": "ext-b7948.example.com",
+            "discovered_at": "2024-01-02T15:14:00Z",
+            "open_ports": "80,8443",
+            "vuln_score": "4.9",
+            "_internal_id": "asm_31"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-b9948",
+      "asset_key": "name:ext-b9948.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_36"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "ext-b7948"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (ext-b7948 vs ext-b9948), different IPs (192.0.2.18 vs 192.0.2.23), different vulnerability scores (4.9 vs 2.0). Name similarity alone is insufficient; contradicting attributes indicate different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.23",
+            "domain": "ext-b9948.example.com",
+            "discovered_at": "",
+            "open_ports": "8443",
+            "vuln_score": "2.0",
+            "_internal_id": "asm_36"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ext-da2dd",
+      "asset_key": "name:ext-da2dd.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_10"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-ext-da2dd"
+          ],
+          "confidence": 0.8,
+          "evidence": "Adjacent but different IPs (203.0.113.99 vs 203.0.113.100). Similar domain names with Group B having 'legacy-' prefix. Identical vuln_score (9.0) across 5-year gap is unusual. Different IPs constitute clear contradiction despite name and vuln_score similarity.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.113.99",
+            "domain": "ext-da2dd.example.com",
+            "discovered_at": "2024-01-28T15:39:00Z",
+            "open_ports": "",
+            "vuln_score": "9.0",
+            "_internal_id": "asm_10"
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-ext-da2dd",
+      "asset_key": "name:legacy-ext-da2dd.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_39"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-ext-0baa2"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different public IPs (203.0.113.100 vs 192.0.2.27), different domain names (legacy-ext-da2dd vs legacy-ext-0baa2), different open ports, different vuln_scores (9.0 vs 8.7). Multiple contradicting attributes confirm different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "ext-da2dd"
+          ],
+          "confidence": 0.8,
+          "evidence": "Adjacent but different IPs (203.0.113.99 vs 203.0.113.100). Similar domain names with Group B having 'legacy-' prefix. Identical vuln_score (9.0) across 5-year gap is unusual. Different IPs constitute clear contradiction despite name and vuln_score similarity.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.113.100",
+            "domain": "legacy-ext-da2dd.example.com",
+            "discovered_at": "2019-05-29T11:02:00Z",
+            "open_ports": "",
+            "vuln_score": "9.0",
+            "_internal_id": "asm_39"
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-pub-12d1f",
+      "asset_key": "name:legacy-pub-12d1f.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_45"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-pub-1728e"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different public IPs (192.0.2.26 vs 192.0.2.29). Different domain names (legacy-pub-1728e vs legacy-pub-12d1f). No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-bd82f"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different public IPs (203.0.114.42 vs 192.0.2.29). Different domain names (bd82f vs 12d1f). Different open port sets (21,3389 vs empty). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "pub-12d1f"
+          ],
+          "confidence": 0.8,
+          "evidence": "Different public IPs (192.0.2.22 vs 192.0.2.29). Domain names similar but B has 'legacy-' prefix. Same vuln_score but different IPs is a clear contradiction. Treated as different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-umpub-aa422"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different public IPs (192.0.2.25 vs 192.0.2.29). Different domain names (aa422 vs 12d1f). No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-umpub-33abf"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (legacy-umpub-33abf vs legacy-pub-12d1f), different vulnerability scores (4.9 vs 3.5), different open ports. No matching identifiers or supporting attributes.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.29",
+            "domain": "legacy-pub-12d1f.example.com",
+            "discovered_at": "2019-02-17T17:32:00Z",
+            "open_ports": "",
+            "vuln_score": "3.5",
+            "_internal_id": "asm_45"
+          }
+        ]
+      }
+    },
+    {
+      "name": "legacy-shdpub-f0c02",
+      "asset_key": "name:legacy-shdpub-f0c02.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_44"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-shdpub-8ac57",
+            "shdpub-8ac57-legacy"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different IPs (192.0.2.24 vs 192.0.2.28), different domain names (legacy-shdpub-8ac57 vs legacy-shdpub-f0c02), different open ports (21 vs 22,8443), different vuln_scores (8.5 vs 6.1). Multiple contradicting attributes confirm different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "shdpub-f0c02"
+          ],
+          "confidence": 0.75,
+          "evidence": "Group A consolidated to IP 192.0.2.19, Group B to 192.0.2.28. Different IPs and domain names (with legacy prefix in B). While identical open ports and vuln_score suggest relationship, primary identifiers do not match sufficiently to conclude same asset.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.28",
+            "domain": "legacy-shdpub-f0c02.example.com",
+            "discovered_at": "2019-04-19T07:57:00Z",
+            "open_ports": "22,8443",
+            "vuln_score": "6.1",
+            "_internal_id": "asm_44"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-12d1f",
+      "asset_key": "name:pub-12d1f.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_35"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-12a1f"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different hostnames (pub-12a1f vs pub-12d1f), different IPs (192.0.2.12 vs 192.0.2.22). Minor name similarity is insufficient without additional supporting identifiers or attributes.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-12d1f"
+          ],
+          "confidence": 0.8,
+          "evidence": "Different public IPs (192.0.2.22 vs 192.0.2.29). Domain names similar but B has 'legacy-' prefix. Same vuln_score but different IPs is a clear contradiction. Treated as different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.22",
+            "domain": "pub-12d1f.example.com",
+            "discovered_at": "",
+            "open_ports": "",
+            "vuln_score": "3.5",
+            "_internal_id": "asm_35"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-f55e1",
+      "asset_key": "name:shdpub-f55e1.example.com",
+      "case": "G",
+      "risk": "Critical",
+      "case_meaning": "Externally visible only, unknown internally: typical shadow IT",
+      "in_ledger": false,
+      "in_edr": false,
+      "in_asm": true,
+      "record_ids": [
+        "asm_21"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shdpub-3fb71"
+          ],
+          "confidence": 0.9,
+          "evidence": "Different hostnames (shdpub-f55e1 vs shdpub-3fb71) with different numeric suffixes. No matching identifiers. Name similarity alone is insufficient evidence.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "shdpub-f55e1.example.com",
+            "discovered_at": "",
+            "open_ports": "8443",
+            "vuln_score": "6.4",
+            "_internal_id": "asm_21"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-12a1f",
+      "asset_key": "id:ast-34100",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_19",
+        "edr_20",
+        "ledger_17"
+      ],
+      "why": "LLM judged pub-12a1f and pub-12a1f to be the same device: IP (192.0.2.12) and hostname (pub-12a1f) match exactly between ASM and EDR records; LLM judged pub-12a1f and pub-12a1f to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.12), asset_id present; LLM judged pub-12a1f and pub-12a1f to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.12), asset_id present",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-12a1f"
+          ],
+          "names_b": [
+            "pub-12a1f"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "IP (192.0.2.12) and hostname (pub-12a1f) match exactly between ASM and EDR records"
+        },
+        {
+          "names_a": [
+            "pub-12a1f"
+          ],
+          "names_b": [
+            "pub-12a1f"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.12), asset_id present"
+        },
+        {
+          "names_a": [
+            "pub-12a1f"
+          ],
+          "names_b": [
+            "pub-12a1f"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.12), asset_id present"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-12d1f"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different hostnames (pub-12a1f vs pub-12d1f), different IPs (192.0.2.12 vs 192.0.2.22). Minor name similarity is insufficient without additional supporting identifiers or attributes.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.12",
+            "domain": "pub-12a1f.example.com",
+            "discovered_at": "",
+            "open_ports": "",
+            "vuln_score": "7.5",
+            "_internal_id": "asm_19"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-12a1f",
+            "ip": "192.0.2.12",
+            "observed_at": "2024-01-09T17:39:00Z",
+            "dest_ip": "10.10.2.128",
+            "dest_fqdn": "",
+            "_internal_id": "edr_20"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-34100",
+            "hostname": "PUB-12A1F",
+            "ip": "192.0.2.12",
+            "fqdn": "pub-12a1f.corp.example.local",
+            "instance_id": "",
+            "owner_dept": "",
+            "owner_user": "fin.user7066",
+            "_internal_id": "ledger_17"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-1728e",
+      "asset_key": "id:ast-87020",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_11",
+        "asm_40",
+        "edr_12",
+        "ledger_10"
+      ],
+      "why": "LLM judged pub-1728e and pub-1728e to be the same device: IP (192.0.2.8) and hostname (pub-1728e) match exactly between ASM and EDR records; LLM judged pub-1728e and pub-1728e to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.8), asset_id present; LLM judged pub-1728e and pub-1728e to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.8), asset_id present; LLM judged pub-1728e and legacy-pub-1728e to be the same device: Matching hostname (pub-1728e), identical open ports (80,443) and vulnerability score (9.8). Different IPs (192.0.2.8 vs 192.0.2.26) in same subnet across 5-year gap. 'legacy-' prefix indicates older record of same asset with IP reassignment.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-1728e"
+          ],
+          "names_b": [
+            "pub-1728e"
+          ],
+          "step": "link",
+          "confidence": 0.98,
+          "evidence": "IP (192.0.2.8) and hostname (pub-1728e) match exactly between ASM and EDR records"
+        },
+        {
+          "names_a": [
+            "pub-1728e"
+          ],
+          "names_b": [
+            "pub-1728e"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.8), asset_id present"
+        },
+        {
+          "names_a": [
+            "pub-1728e"
+          ],
+          "names_b": [
+            "pub-1728e"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.8), asset_id present"
+        },
+        {
+          "names_a": [
+            "pub-1728e"
+          ],
+          "names_b": [
+            "legacy-pub-1728e"
+          ],
+          "step": "lookalike",
+          "confidence": 0.75,
+          "evidence": "Matching hostname (pub-1728e), identical open ports (80,443) and vulnerability score (9.8). Different IPs (192.0.2.8 vs 192.0.2.26) in same subnet across 5-year gap. 'legacy-' prefix indicates older record of same asset with IP reassignment."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "legacy-pub-12d1f"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different public IPs (192.0.2.26 vs 192.0.2.29). Different domain names (legacy-pub-1728e vs legacy-pub-12d1f). No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-bd82f"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different public IPs (192.0.2.26 vs 203.0.114.42). Different domain names (1728e vs bd82f). Different open port sets (80,443 vs 21,3389). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-umpub-aa422"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different public IPs (192.0.2.25 vs 192.0.2.26), different domain names (legacy-umpub-aa422 vs legacy-pub-1728e), different open ports (3306,8080 vs 80,443), different vuln_scores (9.1 vs 9.8). Multiple contradictions confirm different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.8",
+            "domain": "pub-1728e.example.com",
+            "discovered_at": "",
+            "open_ports": "80,443",
+            "vuln_score": "9.8",
+            "_internal_id": "asm_11"
+          },
+          {
+            "public_ip": "192.0.2.26",
+            "domain": "legacy-pub-1728e.example.com",
+            "discovered_at": "2019-01-14T22:32:00Z",
+            "open_ports": "80,443",
+            "vuln_score": "9.8",
+            "_internal_id": "asm_40"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-1728e",
+            "ip": "192.0.2.8",
+            "observed_at": "2024-01-16T09:27:00Z",
+            "dest_ip": "10.17.0.28",
+            "dest_fqdn": "",
+            "_internal_id": "edr_12"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-87020",
+            "hostname": "PUB-1728E",
+            "ip": "192.0.2.8",
+            "fqdn": "pub-1728e.corp.example.local",
+            "instance_id": "i-ef810be5",
+            "owner_dept": "IT",
+            "owner_user": "it.user5001",
+            "_internal_id": "ledger_10"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-25e2e",
+      "asset_key": "id:ast-47703",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_12",
+        "edr_13",
+        "ledger_11"
+      ],
+      "why": "LLM judged (a record without a hostname) and pub-25e2e to be the same device: IP (192.0.2.9) and hostname (pub-25e2e) match exactly between ASM and EDR records; LLM judged (a record without a hostname) and pub-25e2e to be the same device: IP (192.0.2.9) matches between ASM and ledger; ASM missing domain is not contradictory; LLM judged pub-25e2e and pub-25e2e to be the same device: Hostname matches (case-insensitive), IP matches exactly (192.0.2.9), asset_id present",
+      "llm_merges": [
+        {
+          "names_a": [],
+          "names_b": [
+            "pub-25e2e"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "IP (192.0.2.9) and hostname (pub-25e2e) match exactly between ASM and EDR records"
+        },
+        {
+          "names_a": [],
+          "names_b": [
+            "pub-25e2e"
+          ],
+          "step": "link",
+          "confidence": 0.8,
+          "evidence": "IP (192.0.2.9) matches between ASM and ledger; ASM missing domain is not contradictory"
+        },
+        {
+          "names_a": [
+            "pub-25e2e"
+          ],
+          "names_b": [
+            "pub-25e2e"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (192.0.2.9), asset_id present"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-25e2c"
+          ],
+          "confidence": 0.96,
+          "evidence": "Hostnames differ in last character (25E2E vs 25E2C). IPs are different (192.0.2.9 vs 10.10.2.9). Destination peers differ (peer-71890 vs peer-71835). No supporting attributes.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.9",
+            "domain": "",
+            "discovered_at": "2024-01-06T21:36:00Z",
+            "open_ports": "80,3389",
+            "vuln_score": "7.3",
+            "_internal_id": "asm_12"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-25e2e",
+            "ip": "192.0.2.9",
+            "observed_at": "2024-01-17T10:12:00Z",
+            "dest_ip": "10.11.1.220",
+            "dest_fqdn": "peer-71890.corp.example.local",
+            "_internal_id": "edr_13"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-47703",
+            "hostname": "PUB-25E2E",
+            "ip": "192.0.2.9",
+            "fqdn": "pub-25e2e.corp.example.local",
+            "instance_id": "i-b17c6ee0",
+            "owner_dept": "",
+            "owner_user": "",
+            "_internal_id": "ledger_11"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-6bd0a",
+      "asset_key": "id:ast-44086",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_22",
+        "edr_24",
+        "ledger_20"
+      ],
+      "why": "LLM judged pub-6bd0a and pub-6bd0a to be the same device: IP (192.0.2.13) and hostname (pub-6bd0a) match exactly between ASM and EDR records; LLM judged pub-6bd0a and pub-6bd0a to be the same device: Hostname (pub-6bd0a) matches exactly between ASM and ledger; missing IP on ledger record is not contradictory; LLM judged pub-6bd0a and pub-6bd0a to be the same device: Hostname (pub-6bd0a) matches exactly between EDR and ledger; missing IP on ledger is not contradictory",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-6bd0a"
+          ],
+          "names_b": [
+            "pub-6bd0a"
+          ],
+          "step": "link",
+          "confidence": 0.98,
+          "evidence": "IP (192.0.2.13) and hostname (pub-6bd0a) match exactly between ASM and EDR records"
+        },
+        {
+          "names_a": [
+            "pub-6bd0a"
+          ],
+          "names_b": [
+            "pub-6bd0a"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname (pub-6bd0a) matches exactly between ASM and ledger; missing IP on ledger record is not contradictory"
+        },
+        {
+          "names_a": [
+            "pub-6bd0a"
+          ],
+          "names_b": [
+            "pub-6bd0a"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname (pub-6bd0a) matches exactly between EDR and ledger; missing IP on ledger is not contradictory"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-6b40a"
+          ],
+          "confidence": 0.94,
+          "evidence": "Hostnames differ at character 7 (6BD0A vs 6B40A). Different IPs (192.0.2.13 vs 10.8.2.223) across different subnets. Different destination peers. Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.13",
+            "domain": "pub-6bd0a.example.com",
+            "discovered_at": "2024-01-15T16:12:00Z",
+            "open_ports": "21,3306",
+            "vuln_score": "6.7",
+            "_internal_id": "asm_22"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-6bd0a",
+            "ip": "192.0.2.13",
+            "observed_at": "2024-01-24T17:19:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-89039.corp.example.local",
+            "_internal_id": "edr_24"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-44086",
+            "hostname": "PUB-6BD0A",
+            "ip": "",
+            "fqdn": "",
+            "instance_id": "",
+            "owner_dept": "Operations",
+            "owner_user": "ope.user7594",
+            "_internal_id": "ledger_20"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-9a24b",
+      "asset_key": "id:ast-80857",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_26",
+        "edr_29",
+        "ledger_25"
+      ],
+      "why": "LLM judged pub-9a24b and pub-9a24b to be the same device: Hostname matches exactly (pub-9a24b), missing IP in ASM is acceptable, exact hostname match sufficient for same asset; LLM judged pub-9a24b and (a record without a hostname) to be the same device: IP (10.10.2.173) matches; hostname (pub-9a24b) appears in FQDN of ledger record",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-9a24b"
+          ],
+          "names_b": [
+            "pub-9a24b"
+          ],
+          "step": "link",
+          "confidence": 0.85,
+          "evidence": "Hostname matches exactly (pub-9a24b), missing IP in ASM is acceptable, exact hostname match sufficient for same asset"
+        },
+        {
+          "names_a": [
+            "pub-9a24b"
+          ],
+          "names_b": [],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "IP (10.10.2.173) matches; hostname (pub-9a24b) appears in FQDN of ledger record"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-9a248"
+          ],
+          "confidence": 0.92,
+          "evidence": "Hostnames differ at position 7 (pub-9a24b vs pub-9a248). Different IPs (10.10.2.173 vs 10.10.2.40) in same subnet. No supporting attributes beyond name similarity.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "",
+            "domain": "pub-9a24b.example.com",
+            "discovered_at": "2024-01-25T02:41:00Z",
+            "open_ports": "",
+            "vuln_score": "6.8",
+            "_internal_id": "asm_26"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-9a24b",
+            "ip": "10.10.2.173",
+            "observed_at": "2024-01-17T21:34:00Z",
+            "dest_ip": "10.14.0.76",
+            "dest_fqdn": "peer-50099.corp.example.local",
+            "_internal_id": "edr_29"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-80857",
+            "hostname": "",
+            "ip": "10.10.2.173",
+            "fqdn": "pub-9a24b.corp.example.local-01",
+            "instance_id": "i-fdfa6bc2",
+            "owner_dept": "",
+            "owner_user": "hr.user7549",
+            "_internal_id": "ledger_25"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-b6f8e",
+      "asset_key": "id:ast-41275",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_0",
+        "edr_0",
+        "edr_40",
+        "ledger_0"
+      ],
+      "why": "LLM judged pub-b6f8e and pub-b6f8e to be the same device: Hostname matches (pub-b6f8e), IP matches exactly (192.0.2.1), open ports and vulnerability score provide additional support; LLM judged pub-b6f8e and pub-b6f8e to be the same device: Hostname matches (case-insensitive, ignoring .vm suffix), IP in ASM matches pattern, asset_id present; LLM judged pub-b6f8e and pub-b6f8e to be the same device: Hostname matches (case-insensitive, ignoring .vm suffix), IP matches (192.0.2.1), asset_id present; LLM judged pub-b6f8e and pub-b6f8e-legacy to be the same device: Matching hostname (pub-b6f8e), identical destination peer (10.7.1.197) in both records. 'legacy-' suffix and temporal separation (2019 vs 2024) suggest historical record. Different IPs (192.0.2.1 vs 10.20.7.2) consistent with IP reassignment.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-b6f8e"
+          ],
+          "names_b": [
+            "pub-b6f8e"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (pub-b6f8e), IP matches exactly (192.0.2.1), open ports and vulnerability score provide additional support"
+        },
+        {
+          "names_a": [
+            "pub-b6f8e"
+          ],
+          "names_b": [
+            "pub-b6f8e"
+          ],
+          "step": "link",
+          "confidence": 0.92,
+          "evidence": "Hostname matches (case-insensitive, ignoring .vm suffix), IP in ASM matches pattern, asset_id present"
+        },
+        {
+          "names_a": [
+            "pub-b6f8e"
+          ],
+          "names_b": [
+            "pub-b6f8e"
+          ],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "Hostname matches (case-insensitive, ignoring .vm suffix), IP matches (192.0.2.1), asset_id present"
+        },
+        {
+          "names_a": [
+            "pub-b6f8e"
+          ],
+          "names_b": [
+            "pub-b6f8e-legacy"
+          ],
+          "step": "lookalike",
+          "confidence": 0.75,
+          "evidence": "Matching hostname (pub-b6f8e), identical destination peer (10.7.1.197) in both records. 'legacy-' suffix and temporal separation (2019 vs 2024) suggest historical record. Different IPs (192.0.2.1 vs 10.20.7.2) consistent with IP reassignment."
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.1",
+            "domain": "pub-b6f8e.example.com",
+            "discovered_at": "2024-01-30T00:12:00Z",
+            "open_ports": "3306,8443",
+            "vuln_score": "8.8",
+            "_internal_id": "asm_0"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-b6f8e",
+            "ip": "192.0.2.1",
+            "observed_at": "2024-01-08T06:50:00Z",
+            "dest_ip": "10.7.1.197",
+            "dest_fqdn": "peer-29241.corp.example.local",
+            "_internal_id": "edr_0"
+          },
+          {
+            "asset_id_or_hostname": "pub-b6f8e-legacy",
+            "ip": "10.20.7.2",
+            "observed_at": "2019-12-21T08:49:00Z",
+            "dest_ip": "10.7.1.197",
+            "dest_fqdn": "peer-29241.corp.example.local",
+            "_internal_id": "edr_40"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-41275",
+            "hostname": "PUB-B6F8E.vm",
+            "ip": "",
+            "fqdn": "pub-b6f8e.corp.example.local",
+            "instance_id": "i-f888d684",
+            "owner_dept": "",
+            "owner_user": "sal.user5479",
+            "_internal_id": "ledger_0"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-bd82f",
+      "asset_key": "id:ast-41733",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_18",
+        "asm_41",
+        "edr_18",
+        "ledger_15"
+      ],
+      "why": "LLM judged pub-bd82f and pub-bd82f to be the same device: Hostname (pub-bd82f) matches exactly; IPs differ (shared public 203.0.114.41 vs internal 10.1.3.54) consistent with NAT/external scan scenario; LLM judged pub-bd82f and pub-bd82f to be the same device: Hostname (pub-bd82f) matches exactly; IPs differ (shared public 203.0.114.41 vs internal 10.1.3.54) which is consistent with NAT configuration; LLM judged pub-bd82f and pub-bd82f to be the same device: IP (10.1.3.54) and hostname (pub-bd82f) match exactly between EDR and ledger records; LLM judged pub-bd82f and legacy-pub-bd82f to be the same device: Same domain base (pub-bd82f) with legacy prefix. Identical open ports (21,3389). Sequential public IPs (203.0.114.41 vs 203.0.114.42). 5-year gap with legacy designation suggests version evolution.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-bd82f"
+          ],
+          "names_b": [
+            "pub-bd82f"
+          ],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "Hostname (pub-bd82f) matches exactly; IPs differ (shared public 203.0.114.41 vs internal 10.1.3.54) consistent with NAT/external scan scenario"
+        },
+        {
+          "names_a": [
+            "pub-bd82f"
+          ],
+          "names_b": [
+            "pub-bd82f"
+          ],
+          "step": "link",
+          "confidence": 0.85,
+          "evidence": "Hostname (pub-bd82f) matches exactly; IPs differ (shared public 203.0.114.41 vs internal 10.1.3.54) which is consistent with NAT configuration"
+        },
+        {
+          "names_a": [
+            "pub-bd82f"
+          ],
+          "names_b": [
+            "pub-bd82f"
+          ],
+          "step": "link",
+          "confidence": 0.98,
+          "evidence": "IP (10.1.3.54) and hostname (pub-bd82f) match exactly between EDR and ledger records"
+        },
+        {
+          "names_a": [
+            "pub-bd82f"
+          ],
+          "names_b": [
+            "legacy-pub-bd82f"
+          ],
+          "step": "lookalike",
+          "confidence": 0.72,
+          "evidence": "Same domain base (pub-bd82f) with legacy prefix. Identical open ports (21,3389). Sequential public IPs (203.0.114.41 vs 203.0.114.42). 5-year gap with legacy designation suggests version evolution."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "shdpub-0dab3"
+          ],
+          "confidence": 0.95,
+          "evidence": "Both ASM records share only the shared IP address (203.0.114.41), but have completely different domains (shdpub-0dab3 vs pub-bd82f). Shared IP alone is insufficient evidence without other matching identifiers",
+          "step": "link"
+        },
+        {
+          "other": [
+            "pub-bdf2f"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different asset IDs (AST-41733 vs AST-63477). Different hostnames (BD82F vs BDF2F differ in middle position). Different IPs (10.1.3.54 vs 10.1.3.193). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-12d1f"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different public IPs (203.0.114.42 vs 192.0.2.29). Different domain names (bd82f vs 12d1f). Different open port sets (21,3389 vs empty). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-umpub-33abf"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different domain names (pub-bd82f vs umpub-33abf). Different IP availability. Different open port sets. No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-pub-1728e"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different public IPs (192.0.2.26 vs 203.0.114.42). Different domain names (1728e vs bd82f). Different open port sets (80,443 vs 21,3389). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "legacy-umpub-aa422"
+          ],
+          "confidence": 0.95,
+          "evidence": "Different domain names (legacy-umpub-aa422 vs legacy-pub-bd82f), different IPs, different open ports (3306,8080 vs 21,3389), different vulnerability scores. No supporting evidence for same asset.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.114.41",
+            "domain": "pub-bd82f.example.com",
+            "discovered_at": "2024-01-21T09:55:00Z",
+            "open_ports": "21,3389",
+            "vuln_score": "",
+            "_internal_id": "asm_18"
+          },
+          {
+            "public_ip": "203.0.114.42",
+            "domain": "legacy-pub-bd82f.example.com",
+            "discovered_at": "2019-01-18T05:26:00Z",
+            "open_ports": "21,3389",
+            "vuln_score": "",
+            "_internal_id": "asm_41"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-bd82f",
+            "ip": "10.1.3.54",
+            "observed_at": "2024-01-26T07:49:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-37987.corp.example.local",
+            "_internal_id": "edr_18"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-41733",
+            "hostname": "PUB-BD82F",
+            "ip": "10.1.3.54",
+            "fqdn": "pub-bd82f.corp.example.local",
+            "instance_id": "i-07c88d2e",
+            "owner_dept": "Sales",
+            "owner_user": "sal.user6453",
+            "_internal_id": "ledger_15"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-c84c9",
+      "asset_key": "id:ast-51555",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_16",
+        "edr_16",
+        "ledger_14"
+      ],
+      "why": "LLM judged pub-c84c9 and pub-c84c9 to be the same device: Hostname matches (case-insensitive), IP matches exactly (10.15.4.164), asset_id present; LLM judged pub_c84c9 and pub-c84c9 to be the same device: Same hostname (pub-c84c9). Same domain base with internal (corp.example.local) vs external (example.com) variants. Internal IP in ledger/EDR (10.15.4.164) matches external visibility in ASM (203.0.114.108). Consistent with normal external/internal routing.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-c84c9"
+          ],
+          "names_b": [
+            "pub-c84c9"
+          ],
+          "step": "link",
+          "confidence": 0.95,
+          "evidence": "Hostname matches (case-insensitive), IP matches exactly (10.15.4.164), asset_id present"
+        },
+        {
+          "names_a": [
+            "pub_c84c9"
+          ],
+          "names_b": [
+            "pub-c84c9"
+          ],
+          "step": "lookalike",
+          "confidence": 0.84,
+          "evidence": "Same hostname (pub-c84c9). Same domain base with internal (corp.example.local) vs external (example.com) variants. Internal IP in ledger/EDR (10.15.4.164) matches external visibility in ASM (203.0.114.108). Consistent with normal external/internal routing."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-c85",
+            "pub-c8555"
+          ],
+          "confidence": 0.9,
+          "evidence": "Group A: IP 192.0.2.17 with hostname pub-c8555. Group B: IP 10.15.4.164 with hostname PUB-C84C9. Different IP addresses, different asset IDs (AST-99060 vs AST-51555), similar but distinct hostnames (c8555 vs c84c9). No matching identifiers.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "203.0.114.108",
+            "domain": "pub_c84c9.example.com",
+            "discovered_at": "2024-01-08T02:01:00Z",
+            "open_ports": "8443",
+            "vuln_score": "8.1",
+            "_internal_id": "asm_16"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-c84c9",
+            "ip": "10.15.4.164",
+            "observed_at": "2024-01-16T05:59:00Z",
+            "dest_ip": "10.19.9.147",
+            "dest_fqdn": "peer-90060.corp.example.local",
+            "_internal_id": "edr_16"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-51555",
+            "hostname": "PUB-C84C9",
+            "ip": "10.15.4.164",
+            "fqdn": "pub-c84c9.corp.example.local",
+            "instance_id": "i-5c37822c",
+            "owner_dept": "",
+            "owner_user": "mar.user4947",
+            "_internal_id": "ledger_14"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-c85",
+      "asset_key": "id:ast-99060",
+      "case": "A",
+      "risk": "Important",
+      "case_meaning": "In ledger, EDR and external scan: managed but exposed (check vulnerabilities)",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": true,
+      "record_ids": [
+        "asm_30",
+        "edr_31",
+        "ledger_32"
+      ],
+      "why": "LLM judged pub-c8555 and pub-c85 to be the same device: IP (192.0.2.17) matches; hostname appears truncated (pub-c8555 vs pub-c85); LLM judged pub-c8555 and (a record without a hostname) to be the same device: IP (192.0.2.17) matches; domain/FQDN (pub-c8555) consistent between ASM and ledger records; LLM judged pub-c85 and (a record without a hostname) to be the same device: IP (192.0.2.17) matches; hostname appears truncated (pub-c8555 vs pub-c85)",
+      "llm_merges": [
+        {
+          "names_a": [
+            "pub-c8555"
+          ],
+          "names_b": [
+            "pub-c85"
+          ],
+          "step": "link",
+          "confidence": 0.85,
+          "evidence": "IP (192.0.2.17) matches; hostname appears truncated (pub-c8555 vs pub-c85)"
+        },
+        {
+          "names_a": [
+            "pub-c8555"
+          ],
+          "names_b": [],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "IP (192.0.2.17) matches; domain/FQDN (pub-c8555) consistent between ASM and ledger records"
+        },
+        {
+          "names_a": [
+            "pub-c85"
+          ],
+          "names_b": [],
+          "step": "link",
+          "confidence": 0.85,
+          "evidence": "IP (192.0.2.17) matches; hostname appears truncated (pub-c8555 vs pub-c85)"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-c84c9"
+          ],
+          "confidence": 0.9,
+          "evidence": "Group A: IP 192.0.2.17 with hostname pub-c8555. Group B: IP 10.15.4.164 with hostname PUB-C84C9. Different IP addresses, different asset IDs (AST-99060 vs AST-51555), similar but distinct hostnames (c8555 vs c84c9). No matching identifiers.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "asm": [
+          {
+            "public_ip": "192.0.2.17",
+            "domain": "pub-c8555.example.com",
+            "discovered_at": "2024-01-18T11:36:00Z",
+            "open_ports": "22,80",
+            "vuln_score": "",
+            "_internal_id": "asm_30"
+          }
+        ],
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-c85",
+            "ip": "192.0.2.17",
+            "observed_at": "",
+            "dest_ip": "10.20.9.80",
+            "dest_fqdn": "peer-53486.corp.example.local",
+            "_internal_id": "edr_31"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-99060",
+            "hostname": "",
+            "ip": "192.0.2.17",
+            "fqdn": "pub-c8555.corp.example.local",
+            "instance_id": "i-1094586d",
+            "owner_dept": "IT",
+            "owner_user": "it.user4293",
+            "_internal_id": "ledger_32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "10.13.4.82",
+      "asset_key": "id:ast-98961",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_22"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-98961",
+            "hostname": "",
+            "ip": "10.13.4.82",
+            "fqdn": "wks-33f7d.corp.example.local",
+            "instance_id": "",
+            "owner_dept": "Marketing",
+            "owner_user": "mar.user4824",
+            "_internal_id": "ledger_22"
+          }
+        ]
+      }
+    },
+    {
+      "name": "10.19.4.163",
+      "asset_key": "id:ast-78392",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_29"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-78392",
+            "hostname": "",
+            "ip": "10.19.4.163",
+            "fqdn": "",
+            "instance_id": "i-89cfaa71",
+            "owner_dept": "Engineering",
+            "owner_user": "eng.user9953",
+            "_internal_id": "ledger_29"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-1f40f",
+      "asset_key": "id:ast-46127",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_28"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-46127",
+            "hostname": "DORM-1F40F",
+            "ip": "10.4.4.38",
+            "fqdn": "dorm-1f40f.corp.example.local",
+            "instance_id": "i-abf74538",
+            "owner_dept": "Sales",
+            "owner_user": "sal.user6367",
+            "_internal_id": "ledger_28"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-56bed",
+      "asset_key": "id:ast-69056",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_35"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "dorm-be7ea"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (DORM-BE7EA vs DORM-56BED), different asset IDs (AST-48153 vs AST-69056), different instance IDs, different departments and owners. No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-e3d79"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (DORM-56BED vs DORM-E3D79), different asset IDs (AST-69056 vs AST-71079), different instance IDs, different departments (Finance vs IT). No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-853d2"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (DORM-56BED vs DORM-853D2), different asset IDs (AST-69056 vs AST-35847), different instance IDs, different departments (Finance vs IT). Clear contradictions.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-69056",
+            "hostname": "DORM-56BED",
+            "ip": "",
+            "fqdn": "dorm-56bed.corp.example.local",
+            "instance_id": "i-92b1bb79",
+            "owner_dept": "Finance",
+            "owner_user": "fin.user6336",
+            "_internal_id": "ledger_35"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-6085c",
+      "asset_key": "id:ast-88156",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_12"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "dorm-85302"
+          ],
+          "confidence": 0.99,
+          "evidence": "Completely different identifiers: asset IDs (AST-88156 vs AST-64974), hostnames (DORM-6085C vs DORM-85302), IPs (10.7.4.190 vs 10.17.7.235), instance IDs, and departments. Unambiguously different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-853d2"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different asset IDs (AST-88156 vs AST-35847). Different hostnames (DORM-6085C vs DORM-853D2). Different IPs in different subnets (10.7.4.190 vs 10.17.7.40). Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-88156",
+            "hostname": "DORM-6085C",
+            "ip": "10.7.4.190",
+            "fqdn": "",
+            "instance_id": "i-05ad0d55",
+            "owner_dept": "",
+            "owner_user": "",
+            "_internal_id": "ledger_12"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-63a16",
+      "asset_key": "id:ast-34475",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_18"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-34475",
+            "hostname": "dorm-63a16",
+            "ip": "10.9.6.171",
+            "fqdn": "",
+            "instance_id": "i-56f868f4",
+            "owner_dept": "",
+            "owner_user": "it.user0690",
+            "_internal_id": "ledger_18"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-85302",
+      "asset_key": "id:ast-64974",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_34"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "dorm-853d2"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different asset IDs (AST-64974 vs AST-35847). Different hostnames (DORM-85302 vs DORM-853D2). Different IPs in different subnets (10.17.7.235 vs 10.17.7.40). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-6085c"
+          ],
+          "confidence": 0.99,
+          "evidence": "Completely different identifiers: asset IDs (AST-88156 vs AST-64974), hostnames (DORM-6085C vs DORM-85302), IPs (10.7.4.190 vs 10.17.7.235), instance IDs, and departments. Unambiguously different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-64974",
+            "hostname": "DORM-85302",
+            "ip": "10.17.7.235",
+            "fqdn": "dorm-85302.corp.example.local",
+            "instance_id": "i-c21f5327",
+            "owner_dept": "Operations",
+            "owner_user": "ope.user5473",
+            "_internal_id": "ledger_34"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-853d2",
+      "asset_key": "id:ast-35847",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_38"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "dorm-85302"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different asset IDs (AST-64974 vs AST-35847). Different hostnames (DORM-85302 vs DORM-853D2). Different IPs in different subnets (10.17.7.235 vs 10.17.7.40). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-6085c"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different asset IDs (AST-88156 vs AST-35847). Different hostnames (DORM-6085C vs DORM-853D2). Different IPs in different subnets (10.7.4.190 vs 10.17.7.40). Clear separation.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-56bed"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (DORM-56BED vs DORM-853D2), different asset IDs (AST-69056 vs AST-35847), different instance IDs, different departments (Finance vs IT). Clear contradictions.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-e3d79"
+          ],
+          "confidence": 0.95,
+          "evidence": "All primary identifiers differ: different asset IDs (AST-71079 vs AST-35847), different hostnames (DORM-E3D79 vs DORM-853D2), different IPs (10.16.7.107 vs 10.17.7.40), different instance IDs. These are clearly separate assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-35847",
+            "hostname": "DORM-853D2",
+            "ip": "10.17.7.40",
+            "fqdn": "dorm-853d2.corp.example.local",
+            "instance_id": "i-48489990",
+            "owner_dept": "IT",
+            "owner_user": "",
+            "_internal_id": "ledger_38"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-be7ea",
+      "asset_key": "id:ast-48153",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_5"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "dorm-56bed"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (DORM-BE7EA vs DORM-56BED), different asset IDs (AST-48153 vs AST-69056), different instance IDs, different departments and owners. No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-e3d79"
+          ],
+          "confidence": 0.99,
+          "evidence": "Completely different identifiers: asset IDs (AST-48153 vs AST-71079), hostnames (DORM-BE7EA vs DORM-E3D79), IPs (10.5.5.27 vs 10.16.7.107), instance IDs, and departments. Unambiguously different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-48153",
+            "hostname": "DORM-BE7EA",
+            "ip": "10.5.5.27",
+            "fqdn": "dorm-be7ea.corp.example.local",
+            "instance_id": "i-cf005802",
+            "owner_dept": "Marketing",
+            "owner_user": "mar.user5687",
+            "_internal_id": "ledger_5"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm-e3d79",
+      "asset_key": "id:ast-71079",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_37"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "dorm-be7ea"
+          ],
+          "confidence": 0.99,
+          "evidence": "Completely different identifiers: asset IDs (AST-48153 vs AST-71079), hostnames (DORM-BE7EA vs DORM-E3D79), IPs (10.5.5.27 vs 10.16.7.107), instance IDs, and departments. Unambiguously different assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-56bed"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (DORM-56BED vs DORM-E3D79), different asset IDs (AST-69056 vs AST-71079), different instance IDs, different departments (Finance vs IT). No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "dorm-853d2"
+          ],
+          "confidence": 0.95,
+          "evidence": "All primary identifiers differ: different asset IDs (AST-71079 vs AST-35847), different hostnames (DORM-E3D79 vs DORM-853D2), different IPs (10.16.7.107 vs 10.17.7.40), different instance IDs. These are clearly separate assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-71079",
+            "hostname": "DORM-E3D79",
+            "ip": "10.16.7.107",
+            "fqdn": "dorm-e3d79.corp.example.local",
+            "instance_id": "i-db146130",
+            "owner_dept": "IT",
+            "owner_user": "it.user7518",
+            "_internal_id": "ledger_37"
+          }
+        ]
+      }
+    },
+    {
+      "name": "dorm_df446",
+      "asset_key": "id:ast-61287",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_26"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-61287",
+            "hostname": "DORM_DF446",
+            "ip": "10.17.3.132",
+            "fqdn": "dorm-df446.corp.example.local-x",
+            "instance_id": "i-1125aef0",
+            "owner_dept": "Marketing",
+            "owner_user": "mar.user6986",
+            "_internal_id": "ledger_26"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger_19",
+      "asset_key": "id:ast-14321",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_19"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-14321",
+            "hostname": "",
+            "ip": "",
+            "fqdn": "wks-5eb4a.corp.example.local",
+            "instance_id": "",
+            "owner_dept": "Marketing",
+            "owner_user": "mar.user3538",
+            "_internal_id": "ledger_19"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ledger_23",
+      "asset_key": "id:ast-29601",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_23"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-29601",
+            "hostname": "",
+            "ip": "",
+            "fqdn": "dorm-23d79.corp.example.local-01",
+            "instance_id": "i-0ac5850a",
+            "owner_dept": "Engineering",
+            "owner_user": "eng.user7277",
+            "_internal_id": "ledger_23"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-bdf2f",
+      "asset_key": "id:ast-63477",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_36"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-bd82f"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different asset IDs (AST-41733 vs AST-63477). Different hostnames (BD82F vs BDF2F differ in middle position). Different IPs (10.1.3.54 vs 10.1.3.193). Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-63477",
+            "hostname": "PUB-BDF2F",
+            "ip": "10.1.3.193",
+            "fqdn": "pub-bdf2f.corp.example.local",
+            "instance_id": "i-8fb8b71e",
+            "owner_dept": "Sales",
+            "owner_user": "sal.user0390",
+            "_internal_id": "ledger_36"
+          }
+        ]
+      }
+    },
+    {
+      "name": "umpub-1f468",
+      "asset_key": "id:ast-72459",
+      "case": "E",
+      "risk": "Important",
+      "case_meaning": "Ledger only, not detected: retired or inactive asset",
+      "in_ledger": true,
+      "in_edr": false,
+      "in_asm": false,
+      "record_ids": [
+        "ledger_21"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "umpub-57496"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-57496.vm vs UMPUB-1F468), different asset IDs (AST-26359 vs AST-72459), different instance IDs, different departments (Operations vs Finance). Clear contradictions across all identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-3d48b"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (UMPUB-3D48B vs UMPUB-1F468), different asset IDs (AST-60449 vs AST-72459), different instance IDs, different departments (IT vs Finance). No matching identifiers.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-14297"
+          ],
+          "confidence": 0.97,
+          "evidence": "Different asset IDs (AST-40867 vs AST-72459). Different hostnames (UMPUB-14297 vs UMPUB-1F468). Different departments (Sales vs Finance). Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "ledger": [
+          {
+            "asset_id": "AST-72459",
+            "hostname": "UMPUB-1F468",
+            "ip": "",
+            "fqdn": "",
+            "instance_id": "i-be205f54",
+            "owner_dept": "Finance",
+            "owner_user": "fin.user3310",
+            "_internal_id": "ledger_21"
+          }
+        ]
+      }
+    },
+    {
+      "name": "10.15.0.113",
+      "asset_key": "ip:10.15.0.113",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_23"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "",
+            "ip": "10.15.0.113",
+            "observed_at": "2024-01-07T21:17:00Z",
+            "dest_ip": "10.3.7.7",
+            "dest_fqdn": "peer-78150.corp.example.local",
+            "_internal_id": "edr_23"
+          }
+        ]
+      }
+    },
+    {
+      "name": "10.16.2.114",
+      "asset_key": "ip:10.16.2.114",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_39"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shd-b359b"
+          ],
+          "confidence": 0.75,
+          "evidence": "Group B lacks hostname identifier (blank asset_id_or_hostname). Different IPs in same subnet (10.16.2.85 vs 10.16.2.114), different destination connections. Insufficient supporting evidence for same asset.",
+          "step": "lookalike"
+        },
+        {
+          "other": [],
+          "confidence": 0.8,
+          "evidence": "Adjacent IPs (10.16.2.114 vs 10.16.2.115) but both communicate to same destination (10.2.9.93). However, 5-year time gap (2024 vs 2019) and no other matching identifiers. Insufficient evidence for same asset beyond potential DHCP overlap.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "",
+            "ip": "10.16.2.114",
+            "observed_at": "2024-01-11T17:11:00Z",
+            "dest_ip": "10.2.9.93",
+            "dest_fqdn": "",
+            "_internal_id": "edr_39"
+          }
+        ]
+      }
+    },
+    {
+      "name": "10.16.2.115",
+      "asset_key": "ip:10.16.2.115",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_47"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shd-b359b"
+          ],
+          "confidence": 0.9,
+          "evidence": "Different IPs (10.16.2.85 vs 10.16.2.115). One hostname missing in B. Different observation dates (2024 vs 2019). Insufficient supporting evidence.",
+          "step": "lookalike"
+        },
+        {
+          "other": [],
+          "confidence": 0.8,
+          "evidence": "Adjacent IPs (10.16.2.114 vs 10.16.2.115) but both communicate to same destination (10.2.9.93). However, 5-year time gap (2024 vs 2019) and no other matching identifiers. Insufficient evidence for same asset beyond potential DHCP overlap.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "",
+            "ip": "10.16.2.115",
+            "observed_at": "2019-02-20T15:09:00Z",
+            "dest_ip": "10.2.9.93",
+            "dest_fqdn": "",
+            "_internal_id": "edr_47"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-25e2c",
+      "asset_key": "name:pub-25e2c",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_36"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-25e2e"
+          ],
+          "confidence": 0.96,
+          "evidence": "Hostnames differ in last character (25E2E vs 25E2C). IPs are different (192.0.2.9 vs 10.10.2.9). Destination peers differ (peer-71890 vs peer-71835). No supporting attributes.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "umpub-2a2cc"
+          ],
+          "confidence": 0.95,
+          "evidence": "Group A is public-facing asset (192.0.2.2, UMPUB-2A2CC, Engineering dept). Group B is internal workstation (10.10.2.9, pub-25e2c, EDR only). Different IP address ranges, hostnames, and purpose. No matching identifiers support same asset.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-25e2c",
+            "ip": "10.10.2.9",
+            "observed_at": "2024-01-28T21:28:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-71835.corp.example.local",
+            "_internal_id": "edr_36"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-6b40a",
+      "asset_key": "name:pub-6b40a",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_37"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-6bd0a"
+          ],
+          "confidence": 0.94,
+          "evidence": "Hostnames differ at character 7 (6BD0A vs 6B40A). Different IPs (192.0.2.13 vs 10.8.2.223) across different subnets. Different destination peers. Clear separation.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-6b40a",
+            "ip": "10.8.2.223",
+            "observed_at": "2024-01-07T09:28:00Z",
+            "dest_ip": "10.15.1.241",
+            "dest_fqdn": "peer-48379.corp.example.local",
+            "_internal_id": "edr_37"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pub-9a248",
+      "asset_key": "name:pub-9a248",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_38"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "pub-9a24b"
+          ],
+          "confidence": 0.92,
+          "evidence": "Hostnames differ at position 7 (pub-9a24b vs pub-9a248). Different IPs (10.10.2.173 vs 10.10.2.40) in same subnet. No supporting attributes beyond name similarity.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "pub-9a248",
+            "ip": "10.10.2.40",
+            "observed_at": "",
+            "dest_ip": "10.3.5.101",
+            "dest_fqdn": "",
+            "_internal_id": "edr_38"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-3b0f1",
+      "asset_key": "name:shd-3b0f1",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_1"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "SHD-3B0F1",
+            "ip": "10.5.0.209",
+            "observed_at": "",
+            "dest_ip": "10.14.6.32",
+            "dest_fqdn": "peer-63866.corp.example.local",
+            "_internal_id": "edr_1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-3f6f2",
+      "asset_key": "name:shd-3f6f2.vm",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_22"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd-3f6f2.vm",
+            "ip": "",
+            "observed_at": "",
+            "dest_ip": "10.10.7.137",
+            "dest_fqdn": "",
+            "_internal_id": "edr_22"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-4aef7",
+      "asset_key": "name:shd-4aef7",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_10"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shd-4fef7"
+          ],
+          "confidence": 0.85,
+          "evidence": "Hostname characters differ (shd-4aef7 vs shd-4fef7). Different IPs (empty vs 10.14.1.59). Different destination peers (35569 vs 60236). Insufficient supporting evidence.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd-4aef7",
+            "ip": "",
+            "observed_at": "2024-01-07T07:13:00Z",
+            "dest_ip": "10.4.8.246",
+            "dest_fqdn": "peer-35569.corp.example.local",
+            "_internal_id": "edr_10"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-4fef7",
+      "asset_key": "name:shd-4fef7",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_35"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shd-4aef7"
+          ],
+          "confidence": 0.85,
+          "evidence": "Hostname characters differ (shd-4aef7 vs shd-4fef7). Different IPs (empty vs 10.14.1.59). Different destination peers (35569 vs 60236). Insufficient supporting evidence.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd-4fef7",
+            "ip": "10.14.1.59",
+            "observed_at": "",
+            "dest_ip": "10.1.1.59",
+            "dest_fqdn": "peer-60236.corp.example.local",
+            "_internal_id": "edr_35"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-85143",
+      "asset_key": "name:shd-85143",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_27"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd-85143",
+            "ip": "",
+            "observed_at": "2024-01-02T19:03:00Z",
+            "dest_ip": "10.2.7.31",
+            "dest_fqdn": "peer-29503.corp.example.local",
+            "_internal_id": "edr_27"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-aba89-x",
+      "asset_key": "name:shd-aba89-x",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_3"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd-aba89-x",
+            "ip": "10.9.8.82",
+            "observed_at": "2024-01-19T21:26:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-71901.corp.example.local",
+            "_internal_id": "edr_3"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-b359b",
+      "asset_key": "name:shd-b359b",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_30"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [],
+          "confidence": 0.75,
+          "evidence": "Group B lacks hostname identifier (blank asset_id_or_hostname). Different IPs in same subnet (10.16.2.85 vs 10.16.2.114), different destination connections. Insufficient supporting evidence for same asset.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd-b359b",
+            "ip": "10.16.2.85",
+            "observed_at": "2024-01-28T07:30:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "",
+            "_internal_id": "edr_30"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd-d9eab",
+      "asset_key": "name:shd-d9eab",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_25"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "SHD-D9EAB",
+            "ip": "10.20.6.204",
+            "observed_at": "",
+            "dest_ip": "10.10.7.201",
+            "dest_fqdn": "peer-76408.corp.example.local",
+            "_internal_id": "edr_25"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd_70031",
+      "asset_key": "name:shd_70031",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_11"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shd_70031-legacy"
+          ],
+          "confidence": 0.75,
+          "evidence": "Similar hostname (shd_70031 vs shd_70031-legacy), adjacent IPs (10.9.0.91 vs 10.9.0.92), same destination peer (peer-94175). However, explicit 'legacy' suffix and 5-year time gap indicate intentional separation. Conservative judgment as different assets per policy.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd_70031",
+            "ip": "10.9.0.91",
+            "observed_at": "2024-01-16T08:39:00Z",
+            "dest_ip": "10.10.4.189",
+            "dest_fqdn": "peer-94175.corp.example.local",
+            "_internal_id": "edr_11"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shd_70031-legacy",
+      "asset_key": "name:shd_70031-legacy",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_44"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "shd_70031"
+          ],
+          "confidence": 0.75,
+          "evidence": "Similar hostname (shd_70031 vs shd_70031-legacy), adjacent IPs (10.9.0.91 vs 10.9.0.92), same destination peer (peer-94175). However, explicit 'legacy' suffix and 5-year time gap indicate intentional separation. Conservative judgment as different assets per policy.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shd_70031-legacy",
+            "ip": "10.9.0.92",
+            "observed_at": "2019-03-26T19:18:00Z",
+            "dest_ip": "10.10.4.189",
+            "dest_fqdn": "peer-94175.corp.example.local",
+            "_internal_id": "edr_44"
+          }
+        ]
+      }
+    },
+    {
+      "name": "shdpub-3fb71",
+      "asset_key": "name:shdpub-3fb71",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_15"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [],
+          "confidence": 0.75,
+          "evidence": "Only identifier match is IP (192.0.2.10), hostnames are completely different (none vs shdpub-3fb71), insufficient support beyond single identifier",
+          "step": "link"
+        },
+        {
+          "other": [
+            "shdpub-f55e1"
+          ],
+          "confidence": 0.9,
+          "evidence": "Different hostnames (shdpub-f55e1 vs shdpub-3fb71) with different numeric suffixes. No matching identifiers. Name similarity alone is insufficient evidence.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "shdpub-3fb71",
+            "ip": "192.0.2.10",
+            "observed_at": "",
+            "dest_ip": "10.3.5.165",
+            "dest_fqdn": "",
+            "_internal_id": "edr_15"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-33f7d",
+      "asset_key": "name:wks-33f7d",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_26",
+        "edr_46"
+      ],
+      "why": "LLM judged wks-33f7d and wks-33f7d-legacy to be the same device: Same hostname base (wks-33f7d) with legacy suffix. Consecutive IPs (10.13.4.130 vs 10.13.4.131). Same destination peer (peer-11094). 5-year gap indicates old vs new records.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-33f7d"
+          ],
+          "names_b": [
+            "wks-33f7d-legacy"
+          ],
+          "step": "lookalike",
+          "confidence": 0.8,
+          "evidence": "Same hostname base (wks-33f7d) with legacy suffix. Consecutive IPs (10.13.4.130 vs 10.13.4.131). Same destination peer (peer-11094). 5-year gap indicates old vs new records."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "wks-3382d-legacy"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (wks-3382d-legacy vs wks-33f7d-legacy), different IPs (10.15.6.215 vs 10.13.4.131), different destination FQDNs (peer-38146 vs peer-11094). Clearly distinct assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "wks-3382d"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (wks-3382d vs wks-33f7d), different IPs (10.15.6.214 vs 10.13.4.130), different destination FQDNs (peer-38146 vs peer-11094). Clearly distinct assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-33f7d",
+            "ip": "10.13.4.130",
+            "observed_at": "2024-01-22T09:50:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-11094.corp.example.local",
+            "_internal_id": "edr_26"
+          },
+          {
+            "asset_id_or_hostname": "wks-33f7d-legacy",
+            "ip": "10.13.4.131",
+            "observed_at": "2019-03-16T21:01:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-11094.corp.example.local",
+            "_internal_id": "edr_46"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-5eb4a",
+      "asset_key": "name:wks-5eb4a",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_21"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "wks-5eb4a-legacy"
+          ],
+          "confidence": 0.7,
+          "evidence": "Similar hostname (wks-5eb4a vs wks-5eb4a-legacy), adjacent IPs (10.20.0.28 vs 10.20.0.29), same destination peer (peer-13714). However, explicit 'legacy' suffix and 5-year time gap indicate intentional separation. Conservative judgment as different assets per policy.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-5eb4a",
+            "ip": "10.20.0.28",
+            "observed_at": "",
+            "dest_ip": "10.4.7.194",
+            "dest_fqdn": "peer-13714.corp.example.local",
+            "_internal_id": "edr_21"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-5eb4a-legacy",
+      "asset_key": "name:wks-5eb4a-legacy",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_45"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "wks-5eb4a"
+          ],
+          "confidence": 0.7,
+          "evidence": "Similar hostname (wks-5eb4a vs wks-5eb4a-legacy), adjacent IPs (10.20.0.28 vs 10.20.0.29), same destination peer (peer-13714). However, explicit 'legacy' suffix and 5-year time gap indicate intentional separation. Conservative judgment as different assets per policy.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-5eb4a-legacy",
+            "ip": "10.20.0.29",
+            "observed_at": "2019-07-27T23:39:00Z",
+            "dest_ip": "10.4.7.194",
+            "dest_fqdn": "peer-13714.corp.example.local",
+            "_internal_id": "edr_45"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-7c7f2",
+      "asset_key": "name:wks-7c7f2",
+      "case": "F",
+      "risk": "Important",
+      "case_meaning": "EDR only, not in the ledger: unmanaged internal asset",
+      "in_ledger": false,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_34"
+      ],
+      "why": "single record",
+      "llm_merges": [],
+      "kept_apart": [
+        {
+          "other": [
+            "wks-7c6",
+            "wks-7c6f2"
+          ],
+          "confidence": 0.85,
+          "evidence": "Group A has consistent IP 10.7.4.174 with hostname WKS-7C6F2/wks-7c6. Group B has hostname wks-7c7f2 with no IP and different destination peer (peer-85275 vs peer-12816). Hostname mismatch and missing IP in B indicate different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-7c7f2",
+            "ip": "",
+            "observed_at": "2024-01-09T02:48:00Z",
+            "dest_ip": "10.10.6.31",
+            "dest_fqdn": "peer-85275.corp.example.local",
+            "_internal_id": "edr_34"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-084c8",
+      "asset_key": "id:ast-74131",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_6",
+        "ledger_4"
+      ],
+      "why": "LLM judged wks-084c8 and wks-084c8 to be the same device: IP (10.4.0.62) and hostname (wks-084c8) match exactly between EDR and ledger records",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-084c8"
+          ],
+          "names_b": [
+            "wks-084c8"
+          ],
+          "step": "link",
+          "confidence": 0.98,
+          "evidence": "IP (10.4.0.62) and hostname (wks-084c8) match exactly between EDR and ledger records"
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-084c8",
+            "ip": "10.4.0.62",
+            "observed_at": "2024-01-06T09:52:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-85100.corp.example.local",
+            "_internal_id": "edr_6"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-74131",
+            "hostname": "WKS-084C8",
+            "ip": "10.4.0.62",
+            "fqdn": "wks-084c8.corp.example.local",
+            "instance_id": "i-18732b5c",
+            "owner_dept": "Engineering",
+            "owner_user": "",
+            "_internal_id": "ledger_4"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-1fd7b-01",
+      "asset_key": "id:ast-80816",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_8",
+        "ledger_8"
+      ],
+      "why": "LLM judged wks-1fd7b and wks-1fd7b-01 to be the same device: Same hostname base (wks-1fd7b) with minor suffix (-01). Same owner department (Operations). IP missing in EDR record does not contradict ledger assignment. Strong hostname match indicates same asset.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-1fd7b"
+          ],
+          "names_b": [
+            "wks-1fd7b-01"
+          ],
+          "step": "lookalike",
+          "confidence": 0.74,
+          "evidence": "Same hostname base (wks-1fd7b) with minor suffix (-01). Same owner department (Operations). IP missing in EDR record does not contradict ledger assignment. Strong hostname match indicates same asset."
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-1fd7b",
+            "ip": "",
+            "observed_at": "2024-01-17T22:48:00Z",
+            "dest_ip": "10.14.8.202",
+            "dest_fqdn": "",
+            "_internal_id": "edr_8"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-80816",
+            "hostname": "WKS-1FD7B-01",
+            "ip": "10.11.5.194",
+            "fqdn": "wks-1fd7b.corp.example.local",
+            "instance_id": "i-a717ee69",
+            "owner_dept": "Operations",
+            "owner_user": "ope.user8230",
+            "_internal_id": "ledger_8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-3382d",
+      "asset_key": "id:ast-36634",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_43",
+        "edr_9",
+        "ledger_9"
+      ],
+      "why": "LLM judged wks-3382d and wks-3382d to be the same device: Hostname matches (case-insensitive, ignoring .vm suffix), IP matches exactly (10.15.6.214), asset_id present; LLM judged wks-3382d and wks-3382d-legacy to be the same device: Same hostname base (wks-3382d) with legacy suffix. Consecutive IPs (10.15.6.214 vs 10.15.6.215). Same destination peer (peer-38146). 4-year gap indicates old vs new records of same asset.",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-3382d"
+          ],
+          "names_b": [
+            "wks-3382d"
+          ],
+          "step": "link",
+          "confidence": 0.93,
+          "evidence": "Hostname matches (case-insensitive, ignoring .vm suffix), IP matches exactly (10.15.6.214), asset_id present"
+        },
+        {
+          "names_a": [
+            "wks-3382d"
+          ],
+          "names_b": [
+            "wks-3382d-legacy"
+          ],
+          "step": "lookalike",
+          "confidence": 0.8,
+          "evidence": "Same hostname base (wks-3382d) with legacy suffix. Consecutive IPs (10.15.6.214 vs 10.15.6.215). Same destination peer (peer-38146). 4-year gap indicates old vs new records of same asset."
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "wks-33f7d-legacy"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (wks-3382d-legacy vs wks-33f7d-legacy), different IPs (10.15.6.215 vs 10.13.4.131), different destination FQDNs (peer-38146 vs peer-11094). Clearly distinct assets.",
+          "step": "lookalike"
+        },
+        {
+          "other": [
+            "wks-33f7d"
+          ],
+          "confidence": 0.98,
+          "evidence": "Different hostnames (wks-3382d vs wks-33f7d), different IPs (10.15.6.214 vs 10.13.4.130), different destination FQDNs (peer-38146 vs peer-11094). Clearly distinct assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-3382d-legacy",
+            "ip": "10.15.6.215",
+            "observed_at": "2019-12-11T23:01:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-38146.corp.example.local",
+            "_internal_id": "edr_43"
+          },
+          {
+            "asset_id_or_hostname": "wks-3382d",
+            "ip": "10.15.6.214",
+            "observed_at": "2024-01-18T02:13:00Z",
+            "dest_ip": "",
+            "dest_fqdn": "peer-38146.corp.example.local",
+            "_internal_id": "edr_9"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-36634",
+            "hostname": "WKS-3382D.vm",
+            "ip": "10.15.6.214",
+            "fqdn": "wks-3382d.corp.example.local",
+            "instance_id": "i-acd3b4b3",
+            "owner_dept": "HR",
+            "owner_user": "hr.user3406",
+            "_internal_id": "ledger_9"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-3b6a6",
+      "asset_key": "id:ast-48054",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_19",
+        "ledger_16"
+      ],
+      "why": "LLM judged wks-3b6a6 and wks-3b6a6 to be the same device: IP (10.12.8.41) and hostname (wks-3b6a6) match exactly between EDR and ledger records",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-3b6a6"
+          ],
+          "names_b": [
+            "wks-3b6a6"
+          ],
+          "step": "link",
+          "confidence": 0.98,
+          "evidence": "IP (10.12.8.41) and hostname (wks-3b6a6) match exactly between EDR and ledger records"
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-3b6a6",
+            "ip": "10.12.8.41",
+            "observed_at": "2024-01-12T20:59:00Z",
+            "dest_ip": "10.16.0.254",
+            "dest_fqdn": "peer-21834.corp.example.local",
+            "_internal_id": "edr_19"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-48054",
+            "hostname": "WKS-3B6A6",
+            "ip": "10.12.8.41",
+            "fqdn": "",
+            "instance_id": "i-9f8c488f",
+            "owner_dept": "Engineering",
+            "owner_user": "",
+            "_internal_id": "ledger_16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-6611f",
+      "asset_key": "id:ast-87306",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_32",
+        "ledger_33"
+      ],
+      "why": "LLM judged wks-6611f and wks-6611f to be the same device: Hostname matches exactly (case-insensitive), asset_id present, missing IP in EDR is acceptable",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-6611f"
+          ],
+          "names_b": [
+            "wks-6611f"
+          ],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "Hostname matches exactly (case-insensitive), asset_id present, missing IP in EDR is acceptable"
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-6611f",
+            "ip": "",
+            "observed_at": "2024-01-11T20:59:00Z",
+            "dest_ip": "10.8.4.19",
+            "dest_fqdn": "peer-95610.corp.example.local",
+            "_internal_id": "edr_32"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-87306",
+            "hostname": "WKS-6611F",
+            "ip": "10.11.6.236",
+            "fqdn": "wks-6611f.corp.example.local",
+            "instance_id": "i-b17affa3",
+            "owner_dept": "Marketing",
+            "owner_user": "",
+            "_internal_id": "ledger_33"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-71108",
+      "asset_key": "id:ast-15064",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_28",
+        "ledger_24"
+      ],
+      "why": "LLM judged (a record without a hostname) and wks-71108 to be the same device: IP matches exactly (10.8.4.71), asset_id and department in ledger support same asset, missing hostname in EDR is expected",
+      "llm_merges": [
+        {
+          "names_a": [],
+          "names_b": [
+            "wks-71108"
+          ],
+          "step": "link",
+          "confidence": 0.9,
+          "evidence": "IP matches exactly (10.8.4.71), asset_id and department in ledger support same asset, missing hostname in EDR is expected"
+        }
+      ],
+      "kept_apart": [],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "",
+            "ip": "10.8.4.71",
+            "observed_at": "2024-01-14T16:10:00Z",
+            "dest_ip": "10.1.3.240",
+            "dest_fqdn": "peer-99470.corp.example.local",
+            "_internal_id": "edr_28"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-15064",
+            "hostname": "WKS-71108",
+            "ip": "10.8.4.71",
+            "fqdn": "wks-71108.corp.example.local",
+            "instance_id": "i-ae984111",
+            "owner_dept": "Engineering",
+            "owner_user": "eng.user0666",
+            "_internal_id": "ledger_24"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wks-7c6f2",
+      "asset_key": "id:ast-76576",
+      "case": "B",
+      "risk": "Informational",
+      "case_meaning": "In ledger and EDR, not externally visible: internal-only asset",
+      "in_ledger": true,
+      "in_edr": true,
+      "in_asm": false,
+      "record_ids": [
+        "edr_5",
+        "ledger_3"
+      ],
+      "why": "LLM judged wks-7c6 and wks-7c6f2 to be the same device: IP (10.7.4.174) matches exactly; hostname differs slightly (wks-7c6 vs WKS-7C6F2), likely due to truncation or variant naming convention",
+      "llm_merges": [
+        {
+          "names_a": [
+            "wks-7c6"
+          ],
+          "names_b": [
+            "wks-7c6f2"
+          ],
+          "step": "link",
+          "confidence": 0.8,
+          "evidence": "IP (10.7.4.174) matches exactly; hostname differs slightly (wks-7c6 vs WKS-7C6F2), likely due to truncation or variant naming convention"
+        }
+      ],
+      "kept_apart": [
+        {
+          "other": [
+            "wks-7c7f2"
+          ],
+          "confidence": 0.85,
+          "evidence": "Group A has consistent IP 10.7.4.174 with hostname WKS-7C6F2/wks-7c6. Group B has hostname wks-7c7f2 with no IP and different destination peer (peer-85275 vs peer-12816). Hostname mismatch and missing IP in B indicate different assets.",
+          "step": "lookalike"
+        }
+      ],
+      "records": {
+        "edr": [
+          {
+            "asset_id_or_hostname": "wks-7c6",
+            "ip": "10.7.4.174",
+            "observed_at": "",
+            "dest_ip": "10.16.7.235",
+            "dest_fqdn": "peer-12816.corp.example.local",
+            "_internal_id": "edr_5"
+          }
+        ],
+        "ledger": [
+          {
+            "asset_id": "AST-76576",
+            "hostname": "WKS-7C6F2",
+            "ip": "10.7.4.174",
+            "fqdn": "",
+            "instance_id": "",
+            "owner_dept": "Sales",
+            "owner_user": "sal.user0039",
+            "_internal_id": "ledger_3"
+          }
+        ]
+      }
+    }
+  ]
+}

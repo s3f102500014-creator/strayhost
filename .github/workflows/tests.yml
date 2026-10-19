@@ -22,3 +22,18 @@ jobs:
         if: failure()
         shell: bash
         run: grep -A20 -E "^(FAIL|ERROR):" test.log | head -80 | sed 's/^/::error::/'
+      - name: README steps 1-3 (console, recorded run, rules-only baseline)
+        shell: bash
+        run: |
+          set -e
+          python run.py console --routing examples/routing.json --no-browser > console.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8765/api/state > /dev/null && break; sleep 1; done
+          python run.py score --assets examples/demo/recorded_run/assets.json --truth examples/demo/truth.csv | tee recorded.txt
+          grep -q "F1 0.911" recorded.txt
+          grep -q "(missed): 0" recorded.txt
+          python run.py send --from examples/demo/recorded_run --webhook http://127.0.0.1:8765/hook
+          curl -sf http://127.0.0.1:8765/api/state | grep -q "shdpub-0dab3"
+          python run.py run --input examples/demo --out out_rules --no-llm
+          python run.py score --assets out_rules/assets.json --truth examples/demo/truth.csv | tee rules.txt
+          grep -q "Critical alerts: 37 (one correct alert per real high-risk device: 24; duplicate, wrong device or wrong case: 13)" rules.txt
+          grep -q "(missed): 1 (GT-00022)" rules.txt

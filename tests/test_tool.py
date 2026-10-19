@@ -471,6 +471,21 @@ class TestConsoleHTTP(unittest.TestCase):
         self.assertEqual(json.loads(data)["messages"][0]["text"], "hello <b>x</b>")
         self.assertTrue((self.tmp / "console_state.json").exists())
 
+    def test_recorded_run_scores_as_documented_and_can_be_sent(self):
+        rec = ROOT / "examples" / "demo" / "recorded_run"
+        code, stdout, _ = quiet(cli.main, ["score", "--assets", str(rec / "assets.json"),
+                                           "--truth", str(ROOT / "examples" / "demo" / "truth.csv")])
+        self.assertEqual(code, 0)
+        self.assertIn("F1 0.911", stdout)
+        self.assertIn("Critical alerts: 31 (one correct alert per real high-risk device: 25; duplicate, wrong device or wrong case: 6)", stdout)
+        self.assertIn("(missed): 0", stdout)
+        code, _, err = quiet(cli.main, ["send", "--from", str(rec), "--webhook", f"http://127.0.0.1:{self.port}/hook"])
+        self.assertEqual(code, 0, err)
+        state = json.loads(self.req("/api/state")[1])
+        self.assertEqual(sum(1 for t in state["tickets"].values() if t["risk"] == "Critical"), 31)
+        t = state["tickets"]["name:shdpub-0dab3"]
+        self.assertIn("pub-bd82f", json.dumps(t["detail"]["kept_apart"]))
+
     def test_rejects_non_json_content_type(self):
         self.assertEqual(self.req("/hook", json.dumps({"text": "x"}), ctype="text/plain")[0], 415)
 

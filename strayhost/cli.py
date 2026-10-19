@@ -444,6 +444,24 @@ def cmd_console(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_send(args: argparse.Namespace) -> int:
+    """Send the notifications of a finished run (its --out folder) to a webhook again."""
+    from . import notify
+
+    folder = Path(args.from_dir)
+    for name in ("assets.json", "notifications.json"):
+        if not (folder / name).exists():
+            print(f"error: {folder / name} not found", file=sys.stderr)
+            return 2
+    data = json.loads((folder / "assets.json").read_text(encoding="utf-8"))
+    notes = json.loads((folder / "notifications.json").read_text(encoding="utf-8"))
+    outgoing = notes + [notify.run_summary(data["assets"], data["meta"])]
+    sent = notify.post_webhook(args.webhook, outgoing, delay=args.webhook_delay)
+    print(f"sent {sent}/{len(outgoing)} messages to the webhook ({len(notes)} notifications + run summary)",
+          file=sys.stderr)
+    return 0 if sent == len(outgoing) else 1
+
+
 # -------------------------------------------------------------------------- main
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser(prog="strayhost", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -487,6 +505,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     sc.add_argument("--assets", required=True)
     sc.add_argument("--truth", required=True)
     sc.set_defaults(func=cmd_score)
+
+    se = sub.add_parser("send", help="send the notifications of a finished run to a webhook again")
+    se.add_argument("--from", dest="from_dir", required=True, help="the --out folder of a run")
+    se.add_argument("--webhook", required=True)
+    se.add_argument("--webhook-delay", type=float, default=0.0)
+    se.set_defaults(func=cmd_send)
 
     args = p.parse_args(argv)
     if args.cmd == "run" and not (args.input or (args.ledger and args.edr and args.asm)):

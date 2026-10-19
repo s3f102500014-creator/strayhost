@@ -51,7 +51,7 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 
 ## Console: tickets, routing, escalation, e-mail, reports
 
-`python run.py console --data console_data --routing examples/routing.json` starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations of the paper:
+`python3 run.py console --routing examples/routing.json` (Step 1 below) starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations of the paper:
 
 | Situation | What the console does |
 |---|---|
@@ -69,23 +69,89 @@ Tickets are kept per asset, identified by the ledger asset ID, else the full hos
 
 Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent in the background through SMTP when `CAASM_SMTP_HOST` is set (`CAASM_SMTP_PORT` 587 with STARTTLS or 465 with SMTPS, certificates verified; `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM`); otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
 
-## Quick start
+## Try it
 
-Python 3.10+. No packages to install.
+Python 3.10 or later; no packages to install. The commands use `python3` (macOS, Linux); on Windows, type `py` instead of `python3`.
 
 ```sh
-python run.py console --routing examples/routing.json  # terminal 1: console, opens http://127.0.0.1:8765/
-python run.py run --input examples/demo --out out --webhook http://127.0.0.1:8765/hook   # terminal 2
-python run.py score --assets out/assets.json --truth examples/demo/truth.csv
+git clone https://github.com/s3f102500014-creator/strayhost.git
+cd strayhost
 ```
 
-Without an LLM configured this runs a rules-only baseline (records sharing any identifier are combined without review), so you can see the starting point: on the bundled demo (60 devices plus 12 look-alike decoy devices, 133 records), 37 Critical alerts, of which 13 are not a single correct alert for a real high-risk device, and 1 real high-risk device gets no Critical alert at all. Then configure an LLM and run again.
+### Step 1: start the console (terminal 1)
 
-Open the console's Tickets tab to see the alerts, the records behind them and the LLM's reasons.
+```sh
+python3 run.py console --routing examples/routing.json
+```
+
+This opens http://127.0.0.1:8765/ in your browser (with `--no-browser`, open that address yourself). Leave it running and use a second terminal, in the same folder, for the next steps. Ctrl+C stops it. The console keeps its state in the folder `console_data`.
+
+### Step 2: look at the recorded Claude run (no LLM needed)
+
+`examples/demo/recorded_run/` holds the output of the run reported under *Demo result* below: every LLM judgement with its reason (`llm_adjudications.jsonl`), the assets (`assets.json`), the alerts the LLM wrote (`notifications.json`, `alerts.md`) and the terminal output (`terminal_output.txt`).
+
+```sh
+python3 run.py score --assets examples/demo/recorded_run/assets.json --truth examples/demo/truth.csv
+python3 run.py send --from examples/demo/recorded_run --webhook http://127.0.0.1:8765/hook
+```
+
+The first command prints the numbers of the *Demo result* table. The second sends that run's notifications to the console again. In the console, open the Tickets tab, set the second filter to Critical and select `shdpub-0dab3`: the alert text, why its records were combined, which records were kept apart and the LLM's reason for each.
+
+![Console: ticket of shdpub-0dab3 from the recorded run](docs/console.png)
+
+### Step 3: run the rules-only baseline
+
+```sh
+python3 run.py run --input examples/demo --out out_rules --no-llm
+python3 run.py score --assets out_rules/assets.json --truth examples/demo/truth.csv
+```
+
+Records that share any identifier are combined without review. The score shows 37 Critical alerts, 13 of them not a single correct alert for a real high-risk device, and 1 real high-risk device with no Critical alert at all (GT-00022, which is `shdpub-0dab3`).
+
+### Step 4: run it yourself with Claude
+
+This needs a Claude Pro, Max, Team or Enterprise plan; StrayHost uses it through the Claude Code CLI, with no API billing. The Claude CLI path has been tested on macOS; on Linux and Windows only with a stand-in CLI in the automated tests.
+
+1. Install the Claude Code CLI ([official instructions](https://code.claude.com/docs/en/setup)), open a new terminal and check it with `claude --version`:
+
+   ```sh
+   curl -fsSL https://claude.ai/install.sh | bash        # macOS, Linux
+   irm https://claude.ai/install.ps1 | iex               # Windows PowerShell
+   ```
+
+2. Create a subscription token. `claude setup-token` opens your browser; after you approve, it prints a token starting with `sk-ant-oat` (valid for one year) and does not save it. StrayHost runs the CLI with an empty home folder, so it cannot use your normal login; it reads this token from a file instead. Save it to a file only you can read:
+
+   ```sh
+   claude setup-token
+   ( umask 077; printf 'Paste the token and press Enter: '; read -r t; printf '%s\n' "$t" > ~/.strayhost_claude_token )
+   ```
+
+   On Windows PowerShell, the second line is `Read-Host "Paste the token and press Enter" | Set-Content -NoNewline "$HOME\.strayhost_claude_token"`.
+
+3. In terminal 1, stop the console (Ctrl+C) and start it with a new state folder, so that it shows only your run:
+
+   ```sh
+   python3 run.py console --routing examples/routing.json --data console_claude
+   ```
+
+4. In terminal 2, run StrayHost with Claude and score it:
+
+   ```sh
+   export CAASM_LLM_BACKEND=claude-cli
+   export CAASM_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
+   python3 run.py run --input examples/demo --out out_claude --webhook http://127.0.0.1:8765/hook
+   python3 run.py score --assets out_claude/assets.json --truth examples/demo/truth.csv
+   ```
+
+   On Windows PowerShell, the two `export` lines are `$env:CAASM_LLM_BACKEND="claude-cli"` and `$env:CAASM_CLAUDE_OAUTH_TOKEN_FILE="$HOME\.strayhost_claude_token"`.
+
+   Matching takes 5 requests (2 for candidate pairs, 3 for look-alikes) and each Critical alert text one more; in the recorded run this took about 11 minutes in total. LLM answers vary from run to run, so your numbers can differ slightly from the recorded run.
+
+If the run stops at once: "the `claude` command was not found" means the CLI is not on your PATH (set `CAASM_CLAUDE_BIN` to its full path); "Unset these variables first" means an API key such as `ANTHROPIC_API_KEY` is set in your shell, which StrayHost refuses so that nothing is billed to an API account.
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
-On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository (English matching prompt). LLM answers vary from run to run, so another run can give slightly different numbers.
+On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository (English matching prompt). LLM answers vary from run to run, so another run can give slightly different numbers. The files of this run are in `examples/demo/recorded_run/` (Step 2).
 
 | | Rules only (baseline) | StrayHost (LLM decides every combination) |
 |---|---|---|
@@ -104,16 +170,7 @@ Of the 6 remaining imperfect alerts, 5 are also imperfect in the baseline. 3 com
 
 ## Choosing the LLM
 
-**Claude with your subscription (Claude Code CLI, no API billing):**
-
-```sh
-export CAASM_LLM_BACKEND=claude-cli          # uses `claude -p`; model: CAASM_CLAUDE_MODEL (default claude-haiku-4-5-20251001)
-# The CLI runs with an empty home folder, so it cannot see your normal login.
-# Create a subscription token once with `claude setup-token`, save it to a file, and point to it:
-export CAASM_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
-```
-
-StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock/Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI confirms it is using the subscription. The CLI runs without tools, MCP servers or your settings, with only a few environment variables (PATH, proxy and certificate settings). Tested with the real Claude CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
+**Claude with your subscription (Claude Code CLI, no API billing):** set up as in Step 4. The model is `CAASM_CLAUDE_MODEL` (default `claude-haiku-4-5-20251001`). StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock/Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI confirms it is using the subscription. The CLI runs without tools, MCP servers or your settings, with only a few environment variables (PATH, proxy and certificate settings). Tested with the real Claude CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
 
 **Any OpenAI-compatible endpoint** (OpenAI, Gemini, Ollama, vLLM, LM Studio):
 
@@ -153,10 +210,10 @@ Rename your export's columns to these names; files must be UTF-8. If no identifi
 ## Test it on your own kind of mess
 
 ```sh
-python run.py synth --style g1 --n 60 --p 0.2 --out mydata   # clean records + noise: name variants, look-alike decoys, NAT, stale records ... (ASM addresses in documentation ranges)
-python run.py synth --style g2 --n 60 --p 0.2 --out mydata2  # records produced from device events: renames, DHCP, replacements, NAT
-python run.py run --input mydata --out out_mine
-python run.py score --assets out_mine/assets.json --truth mydata/truth.csv
+python3 run.py synth --style g1 --n 60 --p 0.2 --out mydata   # clean records + noise: name variants, look-alike decoys, NAT, stale records ... (private addresses seen by ASM are replaced with addresses from documentation ranges)
+python3 run.py synth --style g2 --n 60 --p 0.2 --out mydata2  # records produced from device events: renames, DHCP, replacements, NAT
+python3 run.py run --input mydata --out out_mine
+python3 run.py score --assets out_mine/assets.json --truth mydata/truth.csv
 ```
 
 `score` reports pairwise precision / recall / F1, how many high-risk devices were found with the right case, how many Critical alerts are not "one correct alert for one real high-risk device" (duplicates, wrong device or wrong case), and how many real high-risk devices got no Critical alert at all.
@@ -181,7 +238,7 @@ python run.py score --assets out_mine/assets.json --truth mydata/truth.csv
 ## Tests
 
 ```sh
-python -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -v
 ```
 
 No real LLM is used: a local fake OpenAI-compatible server and a fake `claude` command check the request path, that nothing is combined without the LLM, size cap, key handling, rate-limit handling and the alert-text check.

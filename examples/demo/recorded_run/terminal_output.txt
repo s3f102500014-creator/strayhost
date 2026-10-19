@@ -1,0 +1,22 @@
+$ python3 run.py run --input examples/demo --out out_claude_en --webhook http://127.0.0.1:8765/hook
+[info] LLM mode: ClaudeCLIClient(model='claude-haiku-4-5-20251001', effort='low'). Every combination of records is decided by the LLM.
+[llm] asking the LLM about 46 candidate pairs in 2 requests (batch 25, 8 workers)
+[llm] 21/46 pairs judged, 19 judged same, requests 1/2
+[llm] 46/46 pairs judged, 43 judged same, requests 2/2
+[llm] asking the LLM about 67 candidate pairs in 3 requests (batch 25, 8 workers)
+[llm] 17/67 pairs judged, 1 judged same, requests 1/3
+[llm] 42/67 pairs judged, 7 judged same, requests 2/3
+[llm] 67/67 pairs judged, 16 judged same, requests 3/3
+[info] writing alert texts with the LLM (checked against the records)
+sent 33/33 messages to the webhook (32 notifications + run summary)
+133 records -> 83 assets (LLM decides every combination (claude-haiku-4-5-20251001)); Critical 31, Important 45, Informational 7; LLM judgements 113, combined 57
+32 notifications (30 alert texts by LLM)
+wrote out_claude_en/assets.json, assets.csv, notifications.json, alerts.md, report.html
+$ python3 run.py score --assets out_claude_en/assets.json --truth examples/demo/truth.csv
+mode: LLM decides every combination (claude-haiku-4-5-20251001)
+pairwise precision 1.000  recall 0.837  F1 0.911  (record pairs placed in the same asset)
+case C devices found with the correct case: 8/9
+case D devices found with the correct case: 6/8
+case G devices found with the correct case: 11/11
+Critical alerts: 31 (one correct alert per real high-risk device: 25; duplicate, wrong device or wrong case: 6); real high-risk devices in the data: 28
+real high-risk devices with no Critical alert at all (missed): 0
