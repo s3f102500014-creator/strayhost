@@ -4,7 +4,7 @@
   synth    generate a synthetic, labelled dataset (three CSVs + truth.csv)
   score    compare a run's assets.json with truth.csv
   console  tickets, routing, escalation, e-mail and reports in the browser
-send     send the notifications of a finished run to a webhook again
+  send     send the notifications of a finished run to a webhook again
 """
 
 from __future__ import annotations

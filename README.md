@@ -95,7 +95,7 @@ python3 run.py score --assets examples/demo/recorded_run/assets.json --truth exa
 python3 run.py send --from examples/demo/recorded_run --webhook http://127.0.0.1:8765/hook
 ```
 
-The first command prints the numbers of the *Demo result* table. The second sends that run's notifications to the console again. In the console, open the Tickets tab, set the second filter to Critical and select `shdpub-0dab3`: the alert text, why its records were combined, which records were kept apart and the LLM's reason for each.
+The first command prints the numbers in the first five rows of the *Demo result* table. The second sends that run's notifications to the console again. In the console, open the Tickets tab, set the second filter to Critical and select `shdpub-0dab3`: the alert text, why its records were combined, which records were kept apart and the LLM's reason for each.
 
 ![Console: ticket of shdpub-0dab3 from the recorded run](docs/console.png)
 
