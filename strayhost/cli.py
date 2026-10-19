@@ -4,6 +4,7 @@
   synth    generate a synthetic, labelled dataset (three CSVs + truth.csv)
   score    compare a run's assets.json with truth.csv
   console  tickets, routing, escalation, e-mail and reports in the browser
+send     send the notifications of a finished run to a webhook again
 """
 
 from __future__ import annotations
@@ -469,8 +470,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     r = sub.add_parser("run", help="reconcile three CSV exports")
     r.add_argument("--input", help="directory containing ledger.csv, edr.csv, asm.csv")
-    r.add_argument("--ledger"); r.add_argument("--edr"); r.add_argument("--asm")
-    r.add_argument("--out", default="out")
+    r.add_argument("--ledger", help="ledger (CMDB) CSV, instead of --input")
+    r.add_argument("--edr", help="EDR CSV, instead of --input")
+    r.add_argument("--asm", help="external attack-surface scan CSV, instead of --input")
+    r.add_argument("--out", default="out", help="output folder (default: out)")
     r.add_argument("--no-llm", action="store_true", help="rules only, even if an LLM is configured")
     r.add_argument("--webhook", help="Slack-compatible incoming-webhook URL (or the local console: http://127.0.0.1:8765/hook)")
     r.add_argument("--webhook-delay", type=float, default=0.0, help="seconds between webhook messages")
@@ -479,37 +482,38 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     for name in ("console",):
         ib = sub.add_parser(name, help="tickets, routing, escalation, e-mail and reports in the browser")
-        ib.add_argument("--port", type=int, default=8765)
-        ib.add_argument("--data", default="console_data", help="folder for the console's state file")
+        ib.add_argument("--port", type=int, default=8765, help="port on 127.0.0.1 (default 8765)")
+        ib.add_argument("--data", default="console_data", help="folder for the console's state file (default: console_data)")
         ib.add_argument("--routing", help="JSON file: e-mail addresses of departments, security team, escalation")
         ib.add_argument("--sla-critical-minutes", type=float, default=24 * 60,
                         help="escalate a Critical ticket still unresolved after this time (default 1 day)")
         ib.add_argument("--sla-important-minutes", type=float, default=72 * 60,
                         help="escalate an Important ticket still unresolved after this time (default 3 days)")
         ib.add_argument("--digest-hour", type=int, default=9, help="hour of the day for the daily digests (default 9)")
-        ib.add_argument("--no-browser", action="store_true")
+        ib.add_argument("--no-browser", action="store_true", help="do not open the browser")
         ib.set_defaults(func=cmd_console)
 
     s = sub.add_parser("synth", help="generate a synthetic labelled dataset")
-    s.add_argument("--out", default="synthetic")
+    s.add_argument("--out", default="synthetic", help="output folder (default: synthetic)")
     s.add_argument("--n", type=int, default=60, help="number of devices")
     s.add_argument("--p", type=float, default=0.2, help="strength of renames / IP changes / replacements (0-1)")
-    s.add_argument("--seed", type=int, default=0)
-    s.add_argument("--mode", default="balanced", choices=["balanced", "imbalanced"])
+    s.add_argument("--seed", type=int, default=0, help="random seed (default 0)")
+    s.add_argument("--mode", default="balanced", choices=["balanced", "imbalanced"],
+                   help="balanced: the seven cases about equally often; imbalanced: 60%% managed internal devices (case B), fewer of the others")
     s.add_argument("--style", default="g1", choices=["g1", "g2"],
                    help="g1: clean records plus noise (name variants, look-alike decoys, ...); "
                         "g2: records produced from device events (renames, DHCP, replacements, NAT)")
     s.set_defaults(func=cmd_synth)
 
     sc = sub.add_parser("score", help="score assets.json against truth.csv")
-    sc.add_argument("--assets", required=True)
-    sc.add_argument("--truth", required=True)
+    sc.add_argument("--assets", required=True, help="assets.json of a run")
+    sc.add_argument("--truth", required=True, help="truth.csv (record_id, true_asset, true_case)")
     sc.set_defaults(func=cmd_score)
 
     se = sub.add_parser("send", help="send the notifications of a finished run to a webhook again")
     se.add_argument("--from", dest="from_dir", required=True, help="the --out folder of a run")
-    se.add_argument("--webhook", required=True)
-    se.add_argument("--webhook-delay", type=float, default=0.0)
+    se.add_argument("--webhook", required=True, help="Slack-compatible webhook URL or http://127.0.0.1:8765/hook")
+    se.add_argument("--webhook-delay", type=float, default=0.0, help="seconds between webhook messages")
     se.set_defaults(func=cmd_send)
 
     args = p.parse_args(argv)

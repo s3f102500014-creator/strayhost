@@ -253,6 +253,10 @@ No real LLM is used: a local fake OpenAI-compatible server and a fake `claude` c
 - Column mapping for specific products is manual for now.
 - Results on synthetic data do not establish accuracy on real networks.
 
+## Documentation
+
+The full tool guide (all commands, parameters, settings and examples) is in [`docs/TOOL_GUIDE.md`](docs/TOOL_GUIDE.md); changes are listed in [`CHANGELOG.md`](CHANGELOG.md).
+
 ## License
 
-MIT. See `LICENSE`.
+MIT, Copyright (c) 2026 Izuru Aki (Toyo University). See `LICENSE`.
