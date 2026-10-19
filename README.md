@@ -85,22 +85,22 @@ Open the console's Tickets tab to see the alerts, the records behind them and th
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
-On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code at commit 7be4ee3, which used the Japanese matching prompt. LLM answers vary from run to run, so another run can give slightly different numbers.
+On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository (English matching prompt). LLM answers vary from run to run, so another run can give slightly different numbers.
 
 | | Rules only (baseline) | StrayHost (LLM decides every combination) |
 |---|---|---|
 | Real high-risk devices with no Critical alert at all (missed) | 1 | **0** |
 | Critical alerts | 37 | **31** |
-| — one correct alert for a real high-risk device | 24 | **26** |
-| — duplicate, wrong device or wrong case | 13 | **5** |
-| Pairwise F1 (precision / recall) | 0.667 (0.885 / 0.535) | **0.918 (1.000 / 0.849)** |
-| Pairs of different devices the LLM called "same" | – | **0 of 45** (111 judgements in total) |
-| Pairs of the same device left uncombined | – | 7 of 66 (6 judged "different"; 1 judged "same" but not applied because of the 2-group cap in the look-alike step) |
-| Alert texts written by the LLM and passing the check | – | 31 of 31 |
+| — one correct alert for a real high-risk device | 24 | **25** |
+| — duplicate, wrong device or wrong case | 13 | **6** |
+| Pairwise F1 (precision / recall) | 0.667 (0.885 / 0.535) | **0.911 (1.000 / 0.837)** |
+| Pairs of different devices the LLM called "same" | – | **0 of 46** (113 judgements in total) |
+| Pairs of the same device left uncombined | – | 10 of 67 (8 judged "different"; 2 judged "same" but not applied because of the 2-group cap in the look-alike step) |
+| Alert texts written by the LLM and passing the check | – | 30 of 31 (the other one contained "8.0-severity", which the check treats as an unknown name, so the template text was sent) |
 
-The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered (translated from Japanese) *"they have the same shared address (203.0.114.41), but the hostnames are completely different (shdpub-0dab3 vs pub-bd82f); a shared IP alone is not enough"*, kept them apart, and raised the Critical alert.
+The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered *"Both ASM records share only the shared IP address (203.0.114.41), but have completely different domains (shdpub-0dab3 vs pub-bd82f). Shared IP alone is insufficient evidence without other matching identifiers"*, kept them apart, and raised the Critical alert.
 
-The 5 remaining imperfect alerts are also imperfect in the baseline. 3 come from old `legacy-` records that the LLM kept separate from the same device (a different IP and, where both records are dated, five years apart): two give a duplicate alert, and one gives a Critical alert for a device whose current records are case A. In the other 2, the device's records share no identifier at all (the EDR record has no hostname, or the ASM record has no domain), so neither the rules nor StrayHost has a candidate pair: the device is alerted, but as case G instead of D or C.
+Of the 6 remaining imperfect alerts, 5 are also imperfect in the baseline. 3 come from old `legacy-` records that the LLM kept separate from the same device (it read the `legacy-` prefix and the different IP as a contradiction), giving a duplicate alert each. In 2, the device's records share no identifier at all (the EDR record has no hostname, or the ASM record has no domain), so neither the rules nor StrayHost has a candidate pair: the device is alerted, but as case G instead of D or C. The sixth is new: an ASM record without a domain matches an EDR record by IP only, and the LLM treated the missing name as a mismatch and kept them apart, so the device is alerted as case G instead of D; the rules had combined this one correctly.
 
 ## Choosing the LLM
 
@@ -192,6 +192,7 @@ No real LLM is used: a local fake OpenAI-compatible server and a fake `claude` c
 - Asking the LLM about every candidate pair costs more requests than asking only about look-alikes (the demo needs a handful of requests; tens of thousands of records need many).
 - The "no merge without a reason" design has been tried on the bundled demo data only. The 19,235-pair figure above is from our earlier evaluation of the previous design (rules join shared identifiers, the LLM decides look-alikes).
 - Being conservative has a cost: the LLM sometimes keeps old (`legacy-`) records of the same device separate, inconsistently across similar cases and across runs, and may treat a missing name as a mismatch. Both produce extra alerts, not hidden ones.
+- The alert-text check is conservative: any word with a digit or a dot that is not in the records (such as "8.0-severity") makes it send the template text instead.
 - Column mapping for specific products is manual for now.
 - Results on synthetic data do not establish accuracy on real networks.
 
