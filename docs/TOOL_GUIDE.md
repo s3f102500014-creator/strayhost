@@ -160,6 +160,8 @@ python3 run.py synth    generate a synthetic labelled dataset
 | `STRAYHOST_LLM_GRAY_LOW` | 0.70 | minimum name similarity for a look-alike pair |
 | `STRAYHOST_LLM_SIZECAP` | 2 | look-alike step: maximum groups combined into one asset (`none` = no cap) |
 | `STRAYHOST_LLM_TIMEOUT`, `STRAYHOST_LLM_MAX_RETRIES` | 120 s (300 s for claude-cli), 4 | per-request timeout and retries |
+| `STRAYHOST_LLM_REASONING_EFFORT` | not sent | e.g. `low` for OpenAI-compatible reasoning models |
+| `STRAYHOST_LLM_MOCK` | – | `1` = dummy LLM for tests |
 | `STRAYHOST_SMTP_HOST`, `STRAYHOST_SMTP_PORT`, `STRAYHOST_SMTP_USER`, `STRAYHOST_SMTP_PASSWORD`, `STRAYHOST_SMTP_FROM` | – , 587 | console e-mail (587 with STARTTLS or 465 with SMTPS; certificates verified) |
 
 ### 3.3 Console
