@@ -389,9 +389,13 @@ class TestClaudeCLI(Base):
 
     def test_relative_cli_path_works(self):
         self.use_fake_claude()
-        rel = os.path.relpath(os.environ["STRAYHOST_CLAUDE_BIN"])
-        os.environ["STRAYHOST_CLAUDE_BIN"] = rel   # the CLI itself runs in a sandbox folder
-        code, out, _, stderr = self.run_tool("ccrel")
+        os.environ["STRAYHOST_CLAUDE_BIN"] = os.path.join(".", "fake_claude.py")  # the CLI itself runs in a sandbox folder
+        cwd = os.getcwd()
+        os.chdir(self.tmp)
+        try:
+            code, out, _, stderr = self.run_tool("ccrel")
+        finally:
+            os.chdir(cwd)
         self.assertEqual(code, 0, stderr)
         self.assertGreater(self.load(out)["meta"]["n_llm_merges"], 0)
 
