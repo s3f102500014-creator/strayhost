@@ -387,6 +387,14 @@ class TestClaudeCLI(Base):
         notes = json.loads((out / "notifications.json").read_text(encoding="utf-8"))
         self.assertTrue(any(n["text_source"] == "llm" for n in notes))
 
+    def test_relative_cli_path_works(self):
+        self.use_fake_claude()
+        rel = os.path.relpath(os.environ["STRAYHOST_CLAUDE_BIN"])
+        os.environ["STRAYHOST_CLAUDE_BIN"] = rel   # the CLI itself runs in a sandbox folder
+        code, out, _, stderr = self.run_tool("ccrel")
+        self.assertEqual(code, 0, stderr)
+        self.assertGreater(self.load(out)["meta"]["n_llm_merges"], 0)
+
     def test_refuses_api_billing_env(self):
         self.use_fake_claude()
         os.environ["ANTHROPIC_API_KEY"] = "sk-ant-api-xyz"

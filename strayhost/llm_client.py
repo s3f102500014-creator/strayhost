@@ -242,6 +242,8 @@ class ClaudeCLIClient:
         self._bin = claude_bin or _os.getenv("STRAYHOST_CLAUDE_BIN") or _shutil.which("claude") or next(
             (p for p in map(_os.path.expanduser, _CLAUDE_BIN_CANDIDATES) if _os.path.isfile(p) and _os.access(p, _os.X_OK)),
             None)
+        if self._bin and any(c and c in self._bin for c in (_os.sep, _os.altsep)):
+            self._bin = _os.path.abspath(_os.path.expanduser(self._bin))  # the CLI runs in a sandbox folder
         if not self._bin:
             raise LLMNotConfiguredError(
                 "the `claude` command was not found. Run `type claude` in your terminal and set "
