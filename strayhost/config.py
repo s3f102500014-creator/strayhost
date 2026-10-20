@@ -13,11 +13,11 @@ from typing import Optional
 # ---- default locations ------------------------------------------------------
 
 # ---- LLM endpoint (OpenAI-compatible /chat/completions) ---------------------
-LLM_BASE_URL_ENV_VAR = "CAASM_LLM_BASE_URL"   # e.g. https://api.openai.com/v1
-LLM_API_KEY_ENV_VAR = "CAASM_LLM_API_KEY"
-LLM_MODEL_ENV_VAR = "CAASM_LLM_MODEL"
-LLM_TIMEOUT_ENV_VAR = "CAASM_LLM_TIMEOUT"
-LLM_REASONING_EFFORT_ENV_VAR = "CAASM_LLM_REASONING_EFFORT"  # optional; sent only if set
+LLM_BASE_URL_ENV_VAR = "STRAYHOST_LLM_BASE_URL"   # e.g. https://api.openai.com/v1
+LLM_API_KEY_ENV_VAR = "STRAYHOST_LLM_API_KEY"
+LLM_MODEL_ENV_VAR = "STRAYHOST_LLM_MODEL"
+LLM_TIMEOUT_ENV_VAR = "STRAYHOST_LLM_TIMEOUT"
+LLM_REASONING_EFFORT_ENV_VAR = "STRAYHOST_LLM_REASONING_EFFORT"  # optional; sent only if set
 LLM_BACKEND_NAME = "openai-compatible"
 
 
@@ -41,16 +41,16 @@ def llm_timeout() -> float:
 
 
 def llm_max_retries() -> int:
-    return int(os.getenv("CAASM_LLM_MAX_RETRIES", "4"))
+    return int(os.getenv("STRAYHOST_LLM_MAX_RETRIES", "4"))
 
 
 def llm_backend() -> str:
     """'openai' (any OpenAI-compatible endpoint, default) or 'claude-cli'."""
-    return os.getenv("CAASM_LLM_BACKEND", "openai").strip().lower()
+    return os.getenv("STRAYHOST_LLM_BACKEND", "openai").strip().lower()
 
 
 def llm_configured() -> bool:
-    """True when an LLM is configured: CAASM_LLM_BACKEND=claude-cli, or an OpenAI-compatible
+    """True when an LLM is configured: STRAYHOST_LLM_BACKEND=claude-cli, or an OpenAI-compatible
     endpoint and model (an API key may be optional, e.g. for a local Ollama server)."""
     if llm_backend() == "claude-cli":
         return True
@@ -61,7 +61,7 @@ def llm_configured() -> bool:
 DEFAULT_REASONING_EFFORT: Optional[str] = os.getenv(LLM_REASONING_EFFORT_ENV_VAR) or None
 
 # ---- mock LLM (offline tests) ------------------------------------------------
-LLM_MOCK_ENV_VAR = "CAASM_LLM_MOCK"
+LLM_MOCK_ENV_VAR = "STRAYHOST_LLM_MOCK"
 
 
 def is_mock_active() -> bool:
@@ -73,14 +73,14 @@ def mock_suffixed_path(path: Path) -> Path:
 
 
 # ---- adjudication settings ------------------------------------------------------
-LLM_GRAY_LOW_ENV_VAR = "CAASM_LLM_GRAY_LOW"
-LLM_WORKERS_ENV_VAR = "CAASM_LLM_WORKERS"
-LLM_SIZE_CAP_ENV_VAR = "CAASM_LLM_SIZECAP"
-LLM_BATCH_SIZE_ENV_VAR = "CAASM_LLM_BATCH_SIZE"
+LLM_GRAY_LOW_ENV_VAR = "STRAYHOST_LLM_GRAY_LOW"
+LLM_WORKERS_ENV_VAR = "STRAYHOST_LLM_WORKERS"
+LLM_SIZE_CAP_ENV_VAR = "STRAYHOST_LLM_SIZECAP"
+LLM_BATCH_SIZE_ENV_VAR = "STRAYHOST_LLM_BATCH_SIZE"
 DEFAULT_LLM_BATCH_SIZE = 25
 LLM_BATCH_SIZE_MIN = 1
 LLM_BATCH_SIZE_MAX = 25
-LLM_MAX_CALLS_ENV_VAR = "CAASM_LLM_MAX_CALLS"
+LLM_MAX_CALLS_ENV_VAR = "STRAYHOST_LLM_MAX_CALLS"
 
 
 def resolve_llm_max_calls() -> Optional[int]:

@@ -67,7 +67,7 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 
 Tickets are kept per asset, identified by the ledger asset ID, else the full host or domain name, else the IP address (if two assets of one run would get the same key, the later one gets a `#2` suffix). The Report tab also has buttons to send the digests and the report at once.
 
-Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent in the background through SMTP when `CAASM_SMTP_HOST` is set (`CAASM_SMTP_PORT` 587 with STARTTLS or 465 with SMTPS, certificates verified; `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM`); otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
+Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept` to an e-mail address and names the security, escalation and report addresses. E-mail is sent in the background through SMTP when `STRAYHOST_SMTP_HOST` is set (`STRAYHOST_SMTP_PORT` 587 with STARTTLS or 465 with SMTPS, certificates verified; `STRAYHOST_SMTP_USER`, `STRAYHOST_SMTP_PASSWORD`, `STRAYHOST_SMTP_FROM`); otherwise every message is kept in the console's E-mail tab and marked "not sent". State (tickets, decisions, e-mail, run history) is one JSON file in `--data`, so it survives restarts. The console listens on 127.0.0.1 only and accepts requests addressed to `127.0.0.1`/`localhost`, with JSON bodies only.
 
 ## Try it
 
@@ -137,17 +137,17 @@ This needs a Claude Pro, Max, Team or Enterprise plan; StrayHost uses it through
 4. In terminal 2, run StrayHost with Claude and score it:
 
    ```sh
-   export CAASM_LLM_BACKEND=claude-cli
-   export CAASM_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
+   export STRAYHOST_LLM_BACKEND=claude-cli
+   export STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
    python3 run.py run --input examples/demo --out out_claude --webhook http://127.0.0.1:8765/hook
    python3 run.py score --assets out_claude/assets.json --truth examples/demo/truth.csv
    ```
 
-   On Windows PowerShell, the two `export` lines are `$env:CAASM_LLM_BACKEND="claude-cli"` and `$env:CAASM_CLAUDE_OAUTH_TOKEN_FILE="$HOME\.strayhost_claude_token"`.
+   On Windows PowerShell, the two `export` lines are `$env:STRAYHOST_LLM_BACKEND="claude-cli"` and `$env:STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE="$HOME\.strayhost_claude_token"`.
 
    Matching takes 5 requests (2 for candidate pairs, 3 for look-alikes) and each Critical alert text one more; in the recorded run this took about 11 minutes in total. LLM answers vary from run to run, so your numbers can differ slightly from the recorded run.
 
-If the run stops at once: "the `claude` command was not found" means the CLI is not on your PATH (set `CAASM_CLAUDE_BIN` to its full path); "Unset these variables first" means an API key such as `ANTHROPIC_API_KEY` is set in your shell, which StrayHost refuses so that nothing is billed to an API account.
+If the run stops at once: "the `claude` command was not found" means the CLI is not on your PATH (set `STRAYHOST_CLAUDE_BIN` to its full path); "Unset these variables first" means an API key such as `ANTHROPIC_API_KEY` is set in your shell, which StrayHost refuses so that nothing is billed to an API account.
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
@@ -170,14 +170,14 @@ Of the 6 remaining imperfect alerts, 5 are also imperfect in the baseline. 3 com
 
 ## Choosing the LLM
 
-**Claude with your subscription (Claude Code CLI, no API billing):** set up as in Step 4. The model is `CAASM_CLAUDE_MODEL` (default `claude-haiku-4-5-20251001`). StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock/Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI confirms it is using the subscription. The CLI runs without tools, MCP servers or your settings, with only a few environment variables (PATH, proxy and certificate settings). Tested with the real Claude CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
+**Claude with your subscription (Claude Code CLI, no API billing):** set up as in Step 4. The model is `STRAYHOST_CLAUDE_MODEL` (default `claude-haiku-4-5-20251001`). StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock/Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI confirms it is using the subscription. The CLI runs without tools, MCP servers or your settings, with only a few environment variables (PATH, proxy and certificate settings). Tested with the real Claude CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
 
 **Any OpenAI-compatible endpoint** (OpenAI, Gemini, Ollama, vLLM, LM Studio):
 
 ```sh
-export CAASM_LLM_BASE_URL=http://localhost:11434/v1   # e.g. Ollama: data stays on your machine
-export CAASM_LLM_MODEL=qwen2.5:14b                    # model names are examples
-export CAASM_LLM_API_KEY=...                          # if the endpoint needs one
+export STRAYHOST_LLM_BASE_URL=http://localhost:11434/v1   # e.g. Ollama: data stays on your machine
+export STRAYHOST_LLM_MODEL=qwen2.5:14b                    # model names are examples
+export STRAYHOST_LLM_API_KEY=...                          # if the endpoint needs one
 ```
 
 On Windows PowerShell use `$env:NAME="value"`. Keys are read from the environment only and never written to output files.
@@ -222,18 +222,18 @@ python3 run.py score --assets out_mine/assets.json --truth mydata/truth.csv
 
 | Environment variable | Default | Meaning |
 |---|---|---|
-| `CAASM_LLM_BACKEND` | `openai` | `openai` (any OpenAI-compatible endpoint) or `claude-cli` |
-| `CAASM_LLM_BASE_URL`, `CAASM_LLM_MODEL`, `CAASM_LLM_API_KEY` | – | endpoint, model, key |
-| `CAASM_CLAUDE_MODEL`, `CAASM_CLAUDE_BIN`, `CAASM_CLAUDE_EFFORT`, `CAASM_CLAUDE_OAUTH_TOKEN_FILE` | `claude-haiku-4-5-20251001`, `claude`, `low`, – | Claude CLI model, path, effort, subscription token file |
-| `CAASM_LLM_WORKERS` | 8 | parallel requests (1–32; use 1–2 on free tiers) |
-| `CAASM_LLM_BATCH_SIZE` | 25 | pairs per request (1–25) |
-| `CAASM_LLM_MAX_CALLS` | none | stop after this many requests |
-| `CAASM_LLM_MAX_CANDIDATES` | 3000 | maximum pairs sent to the LLM (most similar first) |
-| `CAASM_LLM_GRAY_LOW` | 0.70 | minimum name similarity for a pair to be sent |
-| `CAASM_LLM_SIZECAP` | 2 | look-alike step: maximum groups combined into one asset (`none` = no cap) |
-| `CAASM_LLM_TIMEOUT`, `CAASM_LLM_MAX_RETRIES` | 120 s (300 s for claude-cli), 4 | per-request timeout and retries |
-| `CAASM_LLM_REASONING_EFFORT` | not sent | e.g. `low` for OpenAI-compatible reasoning models |
-| `CAASM_LLM_MOCK` | – | `1` = dummy LLM for tests |
+| `STRAYHOST_LLM_BACKEND` | `openai` | `openai` (any OpenAI-compatible endpoint) or `claude-cli` |
+| `STRAYHOST_LLM_BASE_URL`, `STRAYHOST_LLM_MODEL`, `STRAYHOST_LLM_API_KEY` | – | endpoint, model, key |
+| `STRAYHOST_CLAUDE_MODEL`, `STRAYHOST_CLAUDE_BIN`, `STRAYHOST_CLAUDE_EFFORT`, `STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE` | `claude-haiku-4-5-20251001`, `claude`, `low`, – | Claude CLI model, path, effort, subscription token file |
+| `STRAYHOST_LLM_WORKERS` | 8 | parallel requests (1–32; use 1–2 on free tiers) |
+| `STRAYHOST_LLM_BATCH_SIZE` | 25 | pairs per request (1–25) |
+| `STRAYHOST_LLM_MAX_CALLS` | none | stop after this many requests |
+| `STRAYHOST_LLM_MAX_CANDIDATES` | 3000 | maximum pairs sent to the LLM (most similar first) |
+| `STRAYHOST_LLM_GRAY_LOW` | 0.70 | minimum name similarity for a pair to be sent |
+| `STRAYHOST_LLM_SIZECAP` | 2 | look-alike step: maximum groups combined into one asset (`none` = no cap) |
+| `STRAYHOST_LLM_TIMEOUT`, `STRAYHOST_LLM_MAX_RETRIES` | 120 s (300 s for claude-cli), 4 | per-request timeout and retries |
+| `STRAYHOST_LLM_REASONING_EFFORT` | not sent | e.g. `low` for OpenAI-compatible reasoning models |
+| `STRAYHOST_LLM_MOCK` | – | `1` = dummy LLM for tests |
 
 ## Tests
 

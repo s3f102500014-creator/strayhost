@@ -115,7 +115,7 @@ def match_all_by_llm(records: Records, llm_client: Any, out_dir: Path,
     budget = LLMCallBudget(max_calls=_m._resolve_max_llm_calls(None))  # one request budget for both steps
     cap = _m._resolve_max_candidate_pairs(None)
     if cap is not None and len(links) > cap:
-        print(f"[warn] {len(links)} identifier links; only the first {cap} are asked (CAASM_LLM_MAX_CANDIDATES)")
+        print(f"[warn] {len(links)} identifier links; only the first {cap} are asked (STRAYHOST_LLM_MAX_CANDIDATES)")
         links = links[:cap]
     s1: Dict[str, Any] = {}
     shared = shared_addresses(records)

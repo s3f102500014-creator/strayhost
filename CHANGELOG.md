@@ -9,4 +9,5 @@ First release.
 - Slack-compatible webhook and a local console: tickets, department routing, deadlines and escalation, daily digests, weekly report, SMTP e-mail, analyst decisions and suppression rules.
 - Back ends: Claude Code CLI with a subscription token, OpenAI-compatible endpoints, local models.
 - `synth` (synthetic labelled data), `score` (pairwise F1, Critical alert correctness, missed high-risk devices) and `send` (send a finished run's notifications again).
+- All settings are environment variables with the prefix `STRAYHOST_` (for example `STRAYHOST_LLM_BACKEND`).
 - Bundled demo data and the output of one recorded Claude run (`examples/demo/recorded_run`).

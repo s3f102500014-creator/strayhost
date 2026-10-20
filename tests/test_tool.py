@@ -20,8 +20,8 @@ import fake_llm_server  # noqa: E402
 from strayhost import cli, taxonomy  # noqa: E402
 from strayhost.rule_engine import Coverage, coverage_to_case  # noqa: E402
 
-LLM_ENV = ("CAASM_LLM_BASE_URL", "CAASM_LLM_MODEL", "CAASM_LLM_API_KEY", "CAASM_LLM_MOCK", "CAASM_LLM_BACKEND",
-           "CAASM_CLAUDE_BIN", "FAKE_CLAUDE_KEY_SOURCE", "ANTHROPIC_API_KEY")
+LLM_ENV = ("STRAYHOST_LLM_BASE_URL", "STRAYHOST_LLM_MODEL", "STRAYHOST_LLM_API_KEY", "STRAYHOST_LLM_MOCK", "STRAYHOST_LLM_BACKEND",
+           "STRAYHOST_CLAUDE_BIN", "FAKE_CLAUDE_KEY_SOURCE", "ANTHROPIC_API_KEY")
 
 
 def rows(path):
@@ -44,7 +44,7 @@ def quiet(fn, *args):
 class Base(unittest.TestCase):
     def setUp(self):
         self._saved = {k: os.environ.pop(k, None) for k in LLM_ENV}
-        os.environ["CAASM_LLM_MAX_RETRIES"] = "0"
+        os.environ["STRAYHOST_LLM_MAX_RETRIES"] = "0"
         fake_llm_server.reset()
         self.tmp = Path(tempfile.mkdtemp())
         self.data = self.tmp / "data"
@@ -147,8 +147,8 @@ class TestRunWithoutLLM(Base):
         self.assertIn("no Critical alert at all (missed):", stdout)
 
     def test_no_llm_flag_overrides_config(self):
-        os.environ["CAASM_LLM_BASE_URL"] = "http://127.0.0.1:9/v1"
-        os.environ["CAASM_LLM_MODEL"] = "x"
+        os.environ["STRAYHOST_LLM_BASE_URL"] = "http://127.0.0.1:9/v1"
+        os.environ["STRAYHOST_LLM_MODEL"] = "x"
         code, out, _, _ = self.run_tool("r", "--no-llm")
         self.assertEqual(code, 0)
         self.assertEqual(self.load(out)["meta"]["mode"], "rules only (baseline)")
@@ -177,7 +177,7 @@ class TestRunWithLLM(Base):
     def test_nothing_is_combined_without_llm_confirmation(self):
         # the mock LLM answers "different" to everything: no record may be combined,
         # not even records that share an identifier
-        os.environ["CAASM_LLM_MOCK"] = "1"
+        os.environ["STRAYHOST_LLM_MOCK"] = "1"
         code, out_mock, _, _ = self.run_tool("m")
         self.assertEqual(code, 0)
         assets = self.load(out_mock)["assets"]
@@ -187,7 +187,7 @@ class TestRunWithLLM(Base):
     def test_openai_compatible_endpoint(self):
         srv, url = fake_llm_server.start()
         try:
-            os.environ.update(CAASM_LLM_BASE_URL=url, CAASM_LLM_MODEL="fake", CAASM_LLM_API_KEY="sk-test-SECRET-123")
+            os.environ.update(STRAYHOST_LLM_BASE_URL=url, STRAYHOST_LLM_MODEL="fake", STRAYHOST_LLM_API_KEY="sk-test-SECRET-123")
             code, out, stdout, stderr = self.run_tool("f")
         finally:
             srv.shutdown(); srv.server_close()
@@ -219,7 +219,7 @@ class TestRunWithLLM(Base):
             w.writeheader(); w.writerows(rows)
         srv, url = fake_llm_server.start()
         try:
-            os.environ.update(CAASM_LLM_BASE_URL=url, CAASM_LLM_MODEL="fake")
+            os.environ.update(STRAYHOST_LLM_BASE_URL=url, STRAYHOST_LLM_MODEL="fake")
             code, out, _, stderr = self.run_tool("f")
         finally:
             srv.shutdown(); srv.server_close()
@@ -243,7 +243,7 @@ class TestRunWithLLM(Base):
     def test_partial_failure_keeps_pairs_separate(self):
         srv, url = fake_llm_server.start(fail_every=2)
         try:
-            os.environ.update(CAASM_LLM_BASE_URL=url, CAASM_LLM_MODEL="fake")
+            os.environ.update(STRAYHOST_LLM_BASE_URL=url, STRAYHOST_LLM_MODEL="fake")
             code, out, _, stderr = self.run_tool("p")
         finally:
             srv.shutdown(); srv.server_close()
@@ -255,7 +255,7 @@ class TestRunWithLLM(Base):
                 self.assertFalse(v["merged"])
 
     def test_unreachable_llm_is_reported(self):
-        os.environ.update(CAASM_LLM_BASE_URL="http://127.0.0.1:9/v1", CAASM_LLM_MODEL="x")
+        os.environ.update(STRAYHOST_LLM_BASE_URL="http://127.0.0.1:9/v1", STRAYHOST_LLM_MODEL="x")
         code, out, _, stderr = self.run_tool("d")
         self.assertEqual(code, 1)
         self.assertIn("could not be reached", stderr)
@@ -335,7 +335,7 @@ class TestBehaviour(Base):
     def test_size_cap_limits_chaining(self):
         srv, url = fake_llm_server.start()  # answers "same" for every pair
         try:
-            os.environ.update(CAASM_LLM_BASE_URL=url, CAASM_LLM_MODEL="fake")
+            os.environ.update(STRAYHOST_LLM_BASE_URL=url, STRAYHOST_LLM_MODEL="fake")
             code, out, _, stderr = self.run_tool("cap")
         finally:
             srv.shutdown(); srv.server_close()
@@ -350,16 +350,16 @@ class TestBehaviour(Base):
     def test_request_limit_is_not_a_failure(self):
         srv, url = fake_llm_server.start()
         try:
-            os.environ.update(CAASM_LLM_BASE_URL=url, CAASM_LLM_MODEL="fake", CAASM_LLM_MAX_CALLS="1")
+            os.environ.update(STRAYHOST_LLM_BASE_URL=url, STRAYHOST_LLM_MODEL="fake", STRAYHOST_LLM_MAX_CALLS="1")
             code, out, _, stderr = self.run_tool("lim")
         finally:
             srv.shutdown(); srv.server_close()
-            os.environ.pop("CAASM_LLM_MAX_CALLS", None)
+            os.environ.pop("STRAYHOST_LLM_MAX_CALLS", None)
         self.assertEqual(code, 0, stderr)
         self.assertNotIn("judgements failed", stderr)
 
     def test_mock_writes_separate_audit_file(self):
-        os.environ["CAASM_LLM_MOCK"] = "1"
+        os.environ["STRAYHOST_LLM_MOCK"] = "1"
         code, out, _, _ = self.run_tool("mock")
         self.assertEqual(code, 0)
         self.assertTrue((out / "llm_adjudications_mock.jsonl").exists())
@@ -371,11 +371,11 @@ class TestClaudeCLI(Base):
     def use_fake_claude(self, name="fake_claude.py"):
         # copy and mark executable: zip extraction does not keep the executable bit
         import shutil
-        os.environ["CAASM_LLM_BACKEND"] = "claude-cli"
+        os.environ["STRAYHOST_LLM_BACKEND"] = "claude-cli"
         dst = self.tmp / name
         shutil.copy(ROOT / "tests" / "fake_claude.py", dst)
         os.chmod(dst, 0o755)
-        os.environ["CAASM_CLAUDE_BIN"] = str(dst)
+        os.environ["STRAYHOST_CLAUDE_BIN"] = str(dst)
 
     def test_runs_and_writes_ai_alerts(self):
         self.use_fake_claude()
@@ -430,11 +430,11 @@ class TestClaudeCLI(Base):
         self.use_fake_claude()
         tok = self.tmp / "tok"
         tok.write_text("sk-ant-api03-not-a-subscription-token", encoding="utf-8")
-        os.environ["CAASM_CLAUDE_OAUTH_TOKEN_FILE"] = str(tok)
+        os.environ["STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE"] = str(tok)
         try:
             code, _, _, stderr = self.run_tool("cc5")
         finally:
-            os.environ.pop("CAASM_CLAUDE_OAUTH_TOKEN_FILE", None)
+            os.environ.pop("STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE", None)
         self.assertEqual(code, 2)
         self.assertIn("subscription token", stderr)
         self.assertNotIn("not-a-subscription", stderr)
@@ -710,13 +710,13 @@ class TestConsole(unittest.TestCase):
             def send_message(self, m): sent.append(("send", m["To"], m["Subject"]))
         orig = smtplib.SMTP
         smtplib.SMTP = FakeSMTP
-        os.environ.update(CAASM_SMTP_HOST="mail.example.com", CAASM_SMTP_USER="u", CAASM_SMTP_PASSWORD="p")
+        os.environ.update(STRAYHOST_SMTP_HOST="mail.example.com", STRAYHOST_SMTP_USER="u", STRAYHOST_SMTP_PASSWORD="p")
         try:
             self.c.mailer = cm.Mailer()
             self.c.receive(_alert("ghost-9"))
         finally:
             smtplib.SMTP = orig
-            for k in ("CAASM_SMTP_HOST", "CAASM_SMTP_USER", "CAASM_SMTP_PASSWORD"):
+            for k in ("STRAYHOST_SMTP_HOST", "STRAYHOST_SMTP_USER", "STRAYHOST_SMTP_PASSWORD"):
                 os.environ.pop(k, None)
         self.assertEqual(self.c.state["outbox"][-1]["status"], "sent")
         self.assertIn(("starttls", True), sent)  # certificate-verifying context
@@ -733,7 +733,7 @@ class TestConsole(unittest.TestCase):
             def send_message(self, m): pass
         orig = smtplib.SMTP
         smtplib.SMTP = SlowSMTP
-        os.environ["CAASM_SMTP_HOST"] = "mail.example.com"
+        os.environ["STRAYHOST_SMTP_HOST"] = "mail.example.com"
         try:
             c = cm.Console(self.tmp / "bg", routing={"security": {"email": "soc@example.com"}}, background_mail=True)
             start = _t.monotonic()
@@ -747,7 +747,7 @@ class TestConsole(unittest.TestCase):
             self.assertEqual({m["status"] for m in c.snapshot()["outbox"]}, {"sent"})
         finally:
             smtplib.SMTP = orig
-            os.environ.pop("CAASM_SMTP_HOST", None)
+            os.environ.pop("STRAYHOST_SMTP_HOST", None)
 
     def test_http_endpoints(self):
         import http.client, threading

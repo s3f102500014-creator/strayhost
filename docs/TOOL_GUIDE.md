@@ -86,20 +86,20 @@ The commands in this guide use `python3` (macOS, Linux); on Windows, type `py` i
 3. Set two environment variables before `run`:
 
    ```sh
-   export CAASM_LLM_BACKEND=claude-cli
-   export CAASM_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
+   export STRAYHOST_LLM_BACKEND=claude-cli
+   export STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
    ```
 
-   On Windows PowerShell: `$env:CAASM_LLM_BACKEND="claude-cli"` and `$env:CAASM_CLAUDE_OAUTH_TOKEN_FILE="$HOME\.strayhost_claude_token"`.
+   On Windows PowerShell: `$env:STRAYHOST_LLM_BACKEND="claude-cli"` and `$env:STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE="$HOME\.strayhost_claude_token"`.
 
 StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock or Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI reports that it is using the subscription. The CLI runs without tools, MCP servers or your settings, and with only a few environment variables (PATH, proxy and certificate settings).
 
 ### 2.5 Set up another LLM (optional)
 
 ```sh
-export CAASM_LLM_BASE_URL=http://localhost:11434/v1   # e.g. Ollama: data stays on your machine
-export CAASM_LLM_MODEL=qwen2.5:14b                    # model names are examples
-export CAASM_LLM_API_KEY=...                          # if the endpoint needs one
+export STRAYHOST_LLM_BASE_URL=http://localhost:11434/v1   # e.g. Ollama: data stays on your machine
+export STRAYHOST_LLM_MODEL=qwen2.5:14b                    # model names are examples
+export STRAYHOST_LLM_API_KEY=...                          # if the endpoint needs one
 ```
 
 On Windows PowerShell use `$env:NAME="value"`. Keys are read from the environment only and never written to output files.
@@ -150,17 +150,17 @@ python3 run.py synth    generate a synthetic labelled dataset
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `CAASM_LLM_BACKEND` | `openai` | `openai` (any OpenAI-compatible endpoint) or `claude-cli` |
-| `CAASM_LLM_BASE_URL`, `CAASM_LLM_MODEL`, `CAASM_LLM_API_KEY` | – | endpoint, model, key |
-| `CAASM_CLAUDE_MODEL`, `CAASM_CLAUDE_BIN`, `CAASM_CLAUDE_EFFORT`, `CAASM_CLAUDE_OAUTH_TOKEN_FILE` | `claude-haiku-4-5-20251001`, `claude`, `low`, – | Claude CLI model, path, effort, subscription token file |
-| `CAASM_LLM_WORKERS` | 8 | parallel requests (1–32) |
-| `CAASM_LLM_BATCH_SIZE` | 25 | pairs per request (1–25) |
-| `CAASM_LLM_MAX_CALLS` | none | stop after this many requests |
-| `CAASM_LLM_MAX_CANDIDATES` | 3000 | maximum pairs sent to the LLM (most similar first) |
-| `CAASM_LLM_GRAY_LOW` | 0.70 | minimum name similarity for a look-alike pair |
-| `CAASM_LLM_SIZECAP` | 2 | look-alike step: maximum groups combined into one asset (`none` = no cap) |
-| `CAASM_LLM_TIMEOUT`, `CAASM_LLM_MAX_RETRIES` | 120 s (300 s for claude-cli), 4 | per-request timeout and retries |
-| `CAASM_SMTP_HOST`, `CAASM_SMTP_PORT`, `CAASM_SMTP_USER`, `CAASM_SMTP_PASSWORD`, `CAASM_SMTP_FROM` | – , 587 | console e-mail (587 with STARTTLS or 465 with SMTPS; certificates verified) |
+| `STRAYHOST_LLM_BACKEND` | `openai` | `openai` (any OpenAI-compatible endpoint) or `claude-cli` |
+| `STRAYHOST_LLM_BASE_URL`, `STRAYHOST_LLM_MODEL`, `STRAYHOST_LLM_API_KEY` | – | endpoint, model, key |
+| `STRAYHOST_CLAUDE_MODEL`, `STRAYHOST_CLAUDE_BIN`, `STRAYHOST_CLAUDE_EFFORT`, `STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE` | `claude-haiku-4-5-20251001`, `claude`, `low`, – | Claude CLI model, path, effort, subscription token file |
+| `STRAYHOST_LLM_WORKERS` | 8 | parallel requests (1–32) |
+| `STRAYHOST_LLM_BATCH_SIZE` | 25 | pairs per request (1–25) |
+| `STRAYHOST_LLM_MAX_CALLS` | none | stop after this many requests |
+| `STRAYHOST_LLM_MAX_CANDIDATES` | 3000 | maximum pairs sent to the LLM (most similar first) |
+| `STRAYHOST_LLM_GRAY_LOW` | 0.70 | minimum name similarity for a look-alike pair |
+| `STRAYHOST_LLM_SIZECAP` | 2 | look-alike step: maximum groups combined into one asset (`none` = no cap) |
+| `STRAYHOST_LLM_TIMEOUT`, `STRAYHOST_LLM_MAX_RETRIES` | 120 s (300 s for claude-cli), 4 | per-request timeout and retries |
+| `STRAYHOST_SMTP_HOST`, `STRAYHOST_SMTP_PORT`, `STRAYHOST_SMTP_USER`, `STRAYHOST_SMTP_PASSWORD`, `STRAYHOST_SMTP_FROM` | – , 587 | console e-mail (587 with STARTTLS or 465 with SMTPS; certificates verified) |
 
 ### 3.3 Console
 
@@ -178,7 +178,7 @@ The console listens on 127.0.0.1 only, accepts requests addressed to `127.0.0.1`
 | A later run reports the asset as Informational, or no longer reports it | the ticket is resolved automatically |
 | Every 7 days | report e-mail; the Report tab shows assets per case, the share of healthy assets (B) and of potentially undetected assets (E), open tickets per department, tickets past their deadline and the mean time to resolve |
 
-Without `CAASM_SMTP_HOST`, e-mail is kept in the E-mail tab and marked "not sent". The routing file maps the ledger's `owner_dept` to an address (`examples/routing.json`):
+Without `STRAYHOST_SMTP_HOST`, e-mail is kept in the E-mail tab and marked "not sent". The routing file maps the ledger's `owner_dept` to an address (`examples/routing.json`):
 
 ```json
 {"security": {"email": "soc@example.com"}, "escalation": {"email": "ciso@example.com"},

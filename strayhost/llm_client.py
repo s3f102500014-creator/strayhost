@@ -98,8 +98,8 @@ class LLMClient:
         self.model = model or config.llm_model()
         if not self.base_url or not self.model:
             raise LLMNotConfiguredError(
-                "LLM is not configured. Set CAASM_LLM_BASE_URL and CAASM_LLM_MODEL "
-                "(and CAASM_LLM_API_KEY if your endpoint needs one)."
+                "LLM is not configured. Set STRAYHOST_LLM_BASE_URL and STRAYHOST_LLM_MODEL "
+                "(and STRAYHOST_LLM_API_KEY if your endpoint needs one)."
             )
         self._api_key = api_key if api_key is not None else config.llm_api_key()
         self.timeout = timeout or config.llm_timeout()
@@ -180,7 +180,7 @@ class LLMClient:
 
 
 class MockLLM:
-    """Deterministic offline stand-in (CAASM_LLM_MOCK=1). Rejects every candidate pair,
+    """Deterministic offline stand-in (STRAYHOST_LLM_MOCK=1). Rejects every candidate pair,
     so results equal the rules-only mode. For tests only."""
 
     backend = "mock"
@@ -205,7 +205,7 @@ class MockLLM:
 
 
 # ---------------------------------------------------------------------------
-# Claude Code CLI backend (CAASM_LLM_BACKEND=claude-cli): runs `claude -p` with
+# Claude Code CLI backend (STRAYHOST_LLM_BACKEND=claude-cli): runs `claude -p` with
 # your Claude subscription. It refuses to run if the CLI would use pay-as-you-go
 # API billing, and runs the CLI with an empty HOME, no tools and no MCP servers.
 # ---------------------------------------------------------------------------
@@ -238,17 +238,17 @@ class ClaudeCLIClient:
         if found:
             raise LLMNotConfiguredError(
                 "claude-cli runs on your Claude subscription only. Unset these variables first: " + ", ".join(found))
-        self.model = model or _os.getenv("CAASM_CLAUDE_MODEL") or CLAUDE_CLI_DEFAULT_MODEL
-        self._bin = claude_bin or _os.getenv("CAASM_CLAUDE_BIN") or _shutil.which("claude") or next(
+        self.model = model or _os.getenv("STRAYHOST_CLAUDE_MODEL") or CLAUDE_CLI_DEFAULT_MODEL
+        self._bin = claude_bin or _os.getenv("STRAYHOST_CLAUDE_BIN") or _shutil.which("claude") or next(
             (p for p in map(_os.path.expanduser, _CLAUDE_BIN_CANDIDATES) if _os.path.isfile(p) and _os.access(p, _os.X_OK)),
             None)
         if not self._bin:
             raise LLMNotConfiguredError(
                 "the `claude` command was not found. Run `type claude` in your terminal and set "
-                "CAASM_CLAUDE_BIN to the full path it shows (if it is an alias, the path the alias points to).")
+                "STRAYHOST_CLAUDE_BIN to the full path it shows (if it is an alias, the path the alias points to).")
         self.max_retries = max_retries if max_retries is not None else config.llm_max_retries()
-        self.timeout = timeout or float(_os.getenv("CAASM_LLM_TIMEOUT", "300"))
-        self.effort = effort or _os.getenv("CAASM_CLAUDE_EFFORT", "low")
+        self.timeout = timeout or float(_os.getenv("STRAYHOST_LLM_TIMEOUT", "300"))
+        self.effort = effort or _os.getenv("STRAYHOST_CLAUDE_EFFORT", "low")
         self._runner = runner or self._run
         self._sandbox = _tempfile.mkdtemp(prefix="strayhost_claude_")
         _os.makedirs(_os.path.join(self._sandbox, "home"), exist_ok=True)
@@ -267,13 +267,13 @@ class ClaudeCLIClient:
         # folder, so the CLI cannot read your settings, memory or login files.
         env.update({"LANG": "C.UTF-8", "TZ": "UTC", "DISABLE_AUTOUPDATER": "1", "DISABLE_TELEMETRY": "1",
                     "HOME": home, "USERPROFILE": home, "CLAUDE_CONFIG_DIR": _os.path.join(home, ".claude")})
-        token_file = _os.getenv("CAASM_CLAUDE_OAUTH_TOKEN_FILE")
+        token_file = _os.getenv("STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE")
         if token_file:
             with open(_os.path.expanduser(token_file), encoding="utf-8") as f:
                 token = f.read().strip()
             if not token.startswith("sk-ant-oat"):
                 raise LLMNotConfiguredError(
-                    "CAASM_CLAUDE_OAUTH_TOKEN_FILE must contain a subscription token from `claude setup-token` (not an API key)")
+                    "STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE must contain a subscription token from `claude setup-token` (not an API key)")
             env["CLAUDE_CODE_OAUTH_TOKEN"] = token
         return env
 

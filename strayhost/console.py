@@ -22,8 +22,8 @@ runs the operations described in the ICSPIS 2025 paper (case letters as in its T
   or no longer reports it.
 * A report page, and a report e-mail every 7 days, with the share of assets per case.
 
-E-mail is sent through SMTP when CAASM_SMTP_HOST is set (CAASM_SMTP_PORT: 587 STARTTLS
-or 465 SMTPS; CAASM_SMTP_USER, CAASM_SMTP_PASSWORD, CAASM_SMTP_FROM). Messages are sent
+E-mail is sent through SMTP when STRAYHOST_SMTP_HOST is set (STRAYHOST_SMTP_PORT: 587 STARTTLS
+or 465 SMTPS; STRAYHOST_SMTP_USER, STRAYHOST_SMTP_PASSWORD, STRAYHOST_SMTP_FROM). Messages are sent
 in the background; without SMTP every message is kept in the outbox as "not sent".
 
 State is one JSON file in --data. The server binds to 127.0.0.1 only, accepts requests
@@ -68,15 +68,15 @@ class Mailer:
     """SMTP when configured; otherwise messages are only recorded in the outbox."""
 
     def __init__(self) -> None:
-        self.host = os.getenv("CAASM_SMTP_HOST", "").strip()
+        self.host = os.getenv("STRAYHOST_SMTP_HOST", "").strip()
         try:
-            self.port = int(os.getenv("CAASM_SMTP_PORT", "587"))
+            self.port = int(os.getenv("STRAYHOST_SMTP_PORT", "587"))
         except ValueError:
-            print("[warn] CAASM_SMTP_PORT is not a number; using 587", file=sys.stderr)
+            print("[warn] STRAYHOST_SMTP_PORT is not a number; using 587", file=sys.stderr)
             self.port = 587
-        self.user = os.getenv("CAASM_SMTP_USER", "")
-        self.password = os.getenv("CAASM_SMTP_PASSWORD", "")
-        self.sender = os.getenv("CAASM_SMTP_FROM", "strayhost@localhost")
+        self.user = os.getenv("STRAYHOST_SMTP_USER", "")
+        self.password = os.getenv("STRAYHOST_SMTP_PASSWORD", "")
+        self.sender = os.getenv("STRAYHOST_SMTP_FROM", "strayhost@localhost")
 
     @property
     def configured(self) -> bool:
@@ -87,7 +87,7 @@ class Mailer:
         if not to:
             return {"status": "not sent", "reason": "no recipient address in the routing file"}
         if not self.configured:
-            return {"status": "not sent", "reason": "SMTP not configured (CAASM_SMTP_HOST)"}
+            return {"status": "not sent", "reason": "SMTP not configured (STRAYHOST_SMTP_HOST)"}
         msg = EmailMessage()
         msg["From"], msg["To"], msg["Subject"] = self.sender, ", ".join(to), subject
         msg.set_content(body)

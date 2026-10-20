@@ -238,7 +238,7 @@ def _resolve_llm_size_cap(explicit: Optional[Union[int, str]]) -> Optional[int]:
         return None
     if value < 0:
         raise ValueError(
-            f"CAASM_LLM_SIZECAP must be an integer >= 0 or 'none' (got {value})"
+            f"STRAYHOST_LLM_SIZECAP must be an integer >= 0 or 'none' (got {value})"
         )
     return value
 
@@ -647,7 +647,7 @@ def match_llm_adjudicated(
                             "daily_quota": "the provider reported a daily quota limit",
                             "spend_cap": "the provider reported a spending limit",
                             "billing_safety": "the claude CLI did not confirm subscription credentials",
-                        }.get(aborted_reason, "the CAASM_LLM_MAX_CALLS limit was reached")
+                        }.get(aborted_reason, "the STRAYHOST_LLM_MAX_CALLS limit was reached")
                         print(f"[llm] stopping early: {aborted_reason} ({reason_detail}). "
                               f"{done_count}/{n_candidates} pairs judged; the rest are treated as 'not the same device'.",
                               file=sys.stderr, flush=True)
@@ -720,7 +720,7 @@ def match_llm_adjudicated(
     return final_clusters
 
 
-LLM_MAX_CANDIDATES_ENV_VAR = "CAASM_LLM_MAX_CANDIDATES"
+LLM_MAX_CANDIDATES_ENV_VAR = "STRAYHOST_LLM_MAX_CANDIDATES"
 DEFAULT_MAX_CANDIDATE_PAIRS = 3000
 
 

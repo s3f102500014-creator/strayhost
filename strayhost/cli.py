@@ -176,7 +176,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 exit_code = 1
     else:
         clusters = [set(g) for g in base_groups]
-        why = "--no-llm given" if args.no_llm else "no LLM configured: set CAASM_LLM_BACKEND=claude-cli, or CAASM_LLM_BASE_URL and CAASM_LLM_MODEL"
+        why = "--no-llm given" if args.no_llm else "no LLM configured: set STRAYHOST_LLM_BACKEND=claude-cli, or STRAYHOST_LLM_BASE_URL and STRAYHOST_LLM_MODEL"
         print(f"[info] rules-only mode ({why}): records that share any identifier are combined without review; "
               "this is the baseline for comparison.", file=sys.stderr)
         mode = "rules only (baseline)"
