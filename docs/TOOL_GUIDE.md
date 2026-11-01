@@ -78,8 +78,11 @@ The commands in this guide use `python3` (macOS, Linux); on Windows, type `py` i
 2. Create a subscription token with `claude setup-token`. It opens the browser; after you approve, it prints a token starting with `sk-ant-oat` (valid for one year) and does not save it. StrayHost runs the CLI with an empty home folder, so it cannot use your normal login; it reads this token from a file. Save it to a file only you can read:
 
    ```sh
-   ( umask 077; printf 'Paste the token and press Enter: '; read -r t; printf '%s\n' "$t" > ~/.strayhost_claude_token )
+   ( umask 077; pbpaste | tr -d '[:space:]' > ~/.strayhost_claude_token )                                          # macOS: copy the token first
+   ( umask 077; printf 'Paste the token and press Enter: '; read -r t; printf '%s\n' "$t" > ~/.strayhost_claude_token )   # Linux
    ```
+
+   If the token is printed over two lines, copy both lines; StrayHost removes spaces and line breaks when it reads the file. On Linux, paste the token as one line.
 
    On Windows PowerShell: `Read-Host "Paste the token and press Enter" | Set-Content -NoNewline "$HOME\.strayhost_claude_token"`.
 

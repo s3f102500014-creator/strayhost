@@ -451,6 +451,18 @@ class TestClaudeCLI(Base):
         self.assertIn("subscription token", stderr)
         self.assertNotIn("not-a-subscription", stderr)
 
+    def test_token_copied_over_two_lines_is_joined(self):
+        self.use_fake_claude()
+        from strayhost.llm_client import ClaudeCLIClient
+        tok = self.tmp / "tok2"
+        tok.write_text("sk-ant-oat01-abc\n def \n", encoding="utf-8")
+        os.environ["STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE"] = str(tok)
+        try:
+            env = ClaudeCLIClient()._env()
+        finally:
+            os.environ.pop("STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE", None)
+        self.assertEqual(env["CLAUDE_CODE_OAUTH_TOKEN"], "sk-ant-oat01-abcdef")
+
 
 class TestConsoleHTTP(unittest.TestCase):
     def setUp(self):

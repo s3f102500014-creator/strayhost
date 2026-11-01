@@ -4,6 +4,7 @@
 
 - README: step-by-step instructions for macOS, including the Python version check, choosing the Claude model by its full name (Haiku 4.5 and Opus), the expected output of the steps without an LLM, and which results are the same on every run.
 - `run.py` stops with a clear message on Python older than 3.10.
+- The token file may hold a token copied over two lines: spaces and line breaks are removed when it is read. The README saves the token with `pbpaste` on macOS.
 
 ## 0.1.0 — 2026-10-19
 

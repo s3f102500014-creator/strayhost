@@ -272,7 +272,7 @@ class ClaudeCLIClient:
         token_file = _os.getenv("STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE")
         if token_file:
             with open(_os.path.expanduser(token_file), encoding="utf-8") as f:
-                token = f.read().strip()
+                token = "".join(f.read().split())  # a token copied over two lines keeps its line break
             if not token.startswith("sk-ant-oat"):
                 raise LLMNotConfiguredError(
                     "STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE must contain a subscription token from `claude setup-token` (not an API key)")
