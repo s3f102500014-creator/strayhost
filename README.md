@@ -162,7 +162,13 @@ This needs a Claude Pro, Max, Team or Enterprise plan. StrayHost uses the plan t
    claude --version
    ```
 
-   If zsh answers `command not found: claude`, the installer's folder is not on your PATH; follow the PATH instruction that the installer printed, or the official instructions, and open a new window again.
+   If zsh answers `command not found: claude`, the installer put `claude` in `~/.local/bin`, which is not on your PATH. Add it once (this is the fix given in the official troubleshooting guide, https://code.claude.com/docs/en/troubleshoot-install) and check again:
+
+   ```sh
+   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+   source ~/.zshrc
+   claude --version
+   ```
 
 2. Check that no API key or cloud provider is set in your shell. This command must print nothing:
 
