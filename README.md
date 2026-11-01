@@ -178,20 +178,19 @@ This needs a Claude Pro, Max, Team or Enterprise plan. StrayHost uses the plan t
 
    If it prints a line, remove that variable for this window (for example `unset ANTHROPIC_API_KEY`), and delete it from `~/.zshrc` or `~/.zprofile` if it is set there. StrayHost stops at once while any of these is set.
 
-3. Create a subscription token. Run this command on its own:
+3. Create a subscription token and save it to a file only you can read. Run this command on its own:
 
    ```sh
    claude setup-token
    ```
 
-   It opens the browser; after you approve, it prints a token starting with `sk-ant-oat` (valid for one year) and does not save it. The token can be printed over two lines. Select the whole token with the mouse, both lines if it has two, and copy it (Cmd+C). Then save it to a file only you can read and check the start of the file:
+   It opens the browser; after you approve, it prints a token starting with `sk-ant-oat` (valid for one year) and does not save it. Leave the token on the screen and run:
 
    ```sh
-   ( umask 077; pbpaste | tr -d '[:space:]' > ~/.strayhost_claude_token; chmod 600 ~/.strayhost_claude_token )
-   head -c 10 ~/.strayhost_claude_token; echo
+   python3 run.py save-token
    ```
 
-   `pbpaste` writes what you copied, and `tr` removes the line break and spaces of a token printed over two lines. The last command must print `sk-ant-oat`. Do not paste the token anywhere else. StrayHost runs the CLI with an empty home folder, so it cannot use your normal Claude Code login; it reads this file instead.
+   When it asks for the token, select the whole token in the Terminal window with the mouse (both lines if it is printed over two lines), copy it (Cmd+C), paste it (Cmd+V) and press Enter on an empty line. StrayHost removes the line break and spaces, checks that the token starts with `sk-ant-oat`, saves it to `~/.strayhost_claude_token` so that only you can read it, and prints `saved the token (… characters, starts with sk-ant-oat)`. Do not paste the token anywhere else. StrayHost runs the CLI with an empty home folder, so it cannot use your normal Claude Code login; it reads this file instead.
 
 4. In Terminal window 1, stop the console (Ctrl+C) and start it with a new state folder, so that it shows only your run:
 

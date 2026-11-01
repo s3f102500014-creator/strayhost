@@ -13,6 +13,7 @@ import argparse
 import csv
 import html
 import json
+import os
 import sys
 from collections import Counter, defaultdict
 from itertools import combinations
@@ -445,6 +446,32 @@ def cmd_console(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_save_token(args: argparse.Namespace) -> int:
+    """Read a token from `claude setup-token` (pasted over one or more lines) and save it to a file only you can read."""
+    path = Path(os.path.expanduser(args.file))
+    print("Paste the token printed by `claude setup-token` (all of it, one or two lines), "
+          "then press Enter on an empty line:", file=sys.stderr)
+    parts: List[str] = []
+    for line in sys.stdin:
+        if not line.strip():
+            if parts:
+                break
+            continue
+        parts.append(line)
+    token = "".join("".join(parts).split())
+    if not token.startswith("sk-ant-oat") or len(token) < 40:
+        print("error: this is not a subscription token from `claude setup-token` (it must start with sk-ant-oat); "
+              "nothing was saved", file=sys.stderr)
+        return 2
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(token + "\n")
+    os.chmod(path, 0o600)
+    print(f"saved the token ({len(token)} characters, starts with sk-ant-oat) to {path}", file=sys.stderr)
+    return 0
+
+
 def cmd_send(args: argparse.Namespace) -> int:
     """Send the notifications of a finished run (its --out folder) to a webhook again."""
     from . import notify
@@ -515,6 +542,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     se.add_argument("--webhook", required=True, help="Slack-compatible webhook URL or http://127.0.0.1:8765/hook")
     se.add_argument("--webhook-delay", type=float, default=0.0, help="seconds between webhook messages")
     se.set_defaults(func=cmd_send)
+
+    st = sub.add_parser("save-token", help="save a token from `claude setup-token` to a file only you can read")
+    st.add_argument("--file", default="~/.strayhost_claude_token", help="where to save it (default: ~/.strayhost_claude_token)")
+    st.set_defaults(func=cmd_save_token)
 
     args = p.parse_args(argv)
     if args.cmd == "run" and not (args.input or (args.ledger and args.edr and args.asm)):

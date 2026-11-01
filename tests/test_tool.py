@@ -451,6 +451,22 @@ class TestClaudeCLI(Base):
         self.assertIn("subscription token", stderr)
         self.assertNotIn("not-a-subscription", stderr)
 
+    def test_save_token(self):
+        import subprocess, sys as _sys
+        root = Path(__file__).resolve().parent.parent
+        dest = self.tmp / "saved_tok"
+        ok = subprocess.run([_sys.executable, str(root / "run.py"), "save-token", "--file", str(dest)],
+                            input="\n sk-ant-oat01-" + "A" * 40 + "\n BBBB\n\n", capture_output=True, text=True)
+        self.assertEqual(ok.returncode, 0, ok.stderr)
+        self.assertEqual(dest.read_text(encoding="utf-8"), "sk-ant-oat01-" + "A" * 40 + "BBBB\n")
+        if os.name != "nt":
+            self.assertEqual(dest.stat().st_mode & 0o777, 0o600)
+        bad = subprocess.run([_sys.executable, str(root / "run.py"), "save-token", "--file", str(self.tmp / "bad")],
+                             input="(umask 077; pbpaste\n\n", capture_output=True, text=True)
+        self.assertEqual(bad.returncode, 2)
+        self.assertFalse((self.tmp / "bad").exists())
+        self.assertNotIn("pbpaste", bad.stderr)
+
     def test_token_copied_over_two_lines_is_joined(self):
         self.use_fake_claude()
         from strayhost.llm_client import ClaudeCLIClient
