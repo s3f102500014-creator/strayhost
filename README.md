@@ -51,7 +51,7 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 
 ## Console: tickets, routing, escalation, e-mail, reports
 
-`python3 run.py console --routing examples/routing.json` (Step 1 below) starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations of the paper:
+`python3 run.py console --routing examples/routing.json` (Step 2 below) starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations of the paper:
 
 | Situation | What the console does |
 |---|---|
@@ -71,87 +71,161 @@ Routing (`--routing`, see `examples/routing.json`) maps the ledger's `owner_dept
 
 ## Try it
 
-Python 3.10 or later; no packages to install. The commands use `python3` (macOS, Linux); on Windows, type `py` instead of `python3`.
+The steps below are written for macOS (the Terminal app, with the default zsh shell). The Claude back end has been tested with the real Claude Code CLI on macOS only, with Claude Haiku 4.5 (Step 5). Steps 2–4 run in GitHub Actions on macOS, Linux and Windows with Python 3.10 and 3.13; on Windows, type `py` instead of `python3`; the Windows commands for Step 5 are in docs/TOOL_GUIDE.md, section 2.4.
 
-```sh
-git clone https://github.com/s3f102500014-creator/strayhost.git
-cd strayhost
-```
+### Step 1: check Python and get the code
 
-### Step 1: start the console (terminal 1)
+1. Open Terminal (Applications > Utilities > Terminal).
+2. Check the Python version:
+
+   ```sh
+   python3 --version
+   ```
+
+   StrayHost needs Python 3.10 or later and no other packages. The `python3` installed with Apple's Command Line Tools is 3.9 and cannot run StrayHost. If the version is below 3.10, or macOS offers to install the command line developer tools instead, install Python from https://www.python.org/downloads/macos/ (or run `brew install python3` if you use Homebrew), open a new Terminal window and run `python3 --version` again.
+3. Get the code and change to its folder:
+
+   ```sh
+   git clone https://github.com/s3f102500014-creator/strayhost.git
+   cd strayhost
+   ```
+
+   Without git, download https://github.com/s3f102500014-creator/strayhost/archive/refs/heads/main.zip, unzip it, and `cd` to the folder `strayhost-main`. Run every later command in this folder.
+
+### Step 2: start the console (Terminal window 1)
 
 ```sh
 python3 run.py console --routing examples/routing.json
 ```
 
-This opens http://127.0.0.1:8765/ in your browser (with `--no-browser`, open that address yourself). Leave it running and use a second terminal, in the same folder, for the next steps. Ctrl+C stops it. The console keeps its state in the folder `console_data`.
+This opens http://127.0.0.1:8765/ in your browser (with `--no-browser`, open that address yourself). Leave it running. Open a second Terminal window (Cmd+N), change to the same folder (`cd` followed by the folder path) and use it for the next steps. Ctrl+C stops the console. The console keeps its state in the folder `console_data`.
 
-### Step 2: look at the recorded Claude run (no LLM needed)
+### Step 3: look at the recorded Claude run (no LLM needed)
 
-`examples/demo/recorded_run/` holds the output of the run reported under *Demo result* below: every LLM judgement with its reason (`llm_adjudications.jsonl`), the assets (`assets.json`), the alerts the LLM wrote (`notifications.json`, `alerts.md`) and the terminal output (`terminal_output.txt`).
+`examples/demo/recorded_run/` holds the output of the run reported under *Demo result* below (Claude Haiku 4.5, `claude-haiku-4-5-20251001`): every LLM judgement with its reason (`llm_adjudications.jsonl`), the assets (`assets.json`), the alerts the LLM wrote (`notifications.json`, `alerts.md`) and the terminal output (`terminal_output.txt`).
 
 ```sh
 python3 run.py score --assets examples/demo/recorded_run/assets.json --truth examples/demo/truth.csv
 python3 run.py send --from examples/demo/recorded_run --webhook http://127.0.0.1:8765/hook
 ```
 
-The first command prints the numbers in the first five rows of the *Demo result* table. The second sends that run's notifications to the console again. In the console, open the Tickets tab, set the second filter to Critical and select `shdpub-0dab3`: the alert text, why its records were combined, which records were kept apart and the LLM's reason for each.
+The first command reads the saved results and prints:
+
+```text
+mode: LLM decides every combination (claude-haiku-4-5-20251001)
+pairwise precision 1.000  recall 0.837  F1 0.911  (record pairs placed in the same asset)
+case C devices found with the correct case: 8/9
+case D devices found with the correct case: 6/8
+case G devices found with the correct case: 11/11
+Critical alerts: 31 (one correct alert per real high-risk device: 25; duplicate, wrong device or wrong case: 6); real high-risk devices in the data: 28
+real high-risk devices with no Critical alert at all (missed): 0
+```
+
+The second command sends that run's notifications to the console again. In the console, open the Tickets tab, set the second filter to Critical and select `shdpub-0dab3`: the alert text, why its records were combined, which records were kept apart and the LLM's reason for each.
 
 ![Console: ticket of shdpub-0dab3 from the recorded run](docs/console.png)
 
-### Step 3: run the rules-only baseline
+### Step 4: run the rules-only baseline
 
 ```sh
 python3 run.py run --input examples/demo --out out_rules --no-llm
 python3 run.py score --assets out_rules/assets.json --truth examples/demo/truth.csv
 ```
 
-Records that share any identifier are combined without review. The score shows 37 Critical alerts, 13 of them duplicates, wrong devices or wrong cases, and 1 real high-risk device with no Critical alert at all (GT-00022, which is `shdpub-0dab3`).
+Records that share any identifier are combined without review. This mode uses no LLM. The score is:
 
-### Step 4: run it yourself with Claude
+```text
+mode: rules only (baseline)
+pairwise precision 0.885  recall 0.535  F1 0.667  (record pairs placed in the same asset)
+case C devices found with the correct case: 7/9
+case D devices found with the correct case: 6/8
+case G devices found with the correct case: 11/11
+Critical alerts: 37 (one correct alert per real high-risk device: 24; duplicate, wrong device or wrong case: 13); real high-risk devices in the data: 28
+real high-risk devices with no Critical alert at all (missed): 1 (GT-00022)
+```
 
-This needs a Claude Pro, Max, Team or Enterprise plan; StrayHost uses it through the Claude Code CLI, with no API billing. The Claude CLI path has been tested on macOS; on Linux and Windows only with a stand-in CLI in the automated tests.
+GT-00022 is `shdpub-0dab3`.
 
-1. Install the Claude Code CLI ([official instructions](https://code.claude.com/docs/en/setup)), open a new terminal and check it with `claude --version`:
+### Step 5: run it yourself with Claude Haiku 4.5
+
+This needs a Claude Pro, Max, Team or Enterprise plan. StrayHost uses the plan through the Claude Code CLI and refuses to use an API key, so nothing is billed to an API account.
+
+1. Install the Claude Code CLI (official instructions: https://code.claude.com/docs/en/setup):
 
    ```sh
-   curl -fsSL https://claude.ai/install.sh | bash        # macOS, Linux
-   irm https://claude.ai/install.ps1 | iex               # Windows PowerShell
+   curl -fsSL https://claude.ai/install.sh | bash
    ```
 
-2. Create a subscription token. `claude setup-token` opens your browser; after you approve, it prints a token starting with `sk-ant-oat` (valid for one year) and does not save it. StrayHost runs the CLI with an empty home folder, so it cannot use your normal login; it reads this token from a file instead. Save it to a file only you can read:
+   Close Terminal window 2, open a new one (Cmd+N), change to the StrayHost folder again and check the CLI. Use this window as Terminal window 2 from here on:
+
+   ```sh
+   claude --version
+   ```
+
+   If zsh answers `command not found: claude`, the installer's folder is not on your PATH; follow the PATH instruction that the installer printed, or the official instructions, and open a new window again.
+
+2. Check that no API key or cloud provider is set in your shell. This command must print nothing:
+
+   ```sh
+   env | grep -E '^(ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN|CLAUDE_CODE_USE_BEDROCK|CLAUDE_CODE_USE_VERTEX|CLAUDE_CODE_USE_FOUNDRY)='
+   ```
+
+   If it prints a line, remove that variable for this window (for example `unset ANTHROPIC_API_KEY`), and delete it from `~/.zshrc` or `~/.zprofile` if it is set there. StrayHost stops at once while any of these is set.
+
+3. Create a subscription token and save it to a file only you can read. `claude setup-token` opens the browser; after you approve, it prints a token starting with `sk-ant-oat` (valid for one year) and does not save it. StrayHost runs the CLI with an empty home folder, so it cannot use your normal Claude Code login; it reads this file instead.
 
    ```sh
    claude setup-token
-   ( umask 077; printf 'Paste the token and press Enter: '; read -r t; printf '%s\n' "$t" > ~/.strayhost_claude_token )
+   ( umask 077; printf 'Paste the token and press Enter: '; read -r t; printf '%s\n' "$t" > ~/.strayhost_claude_token; chmod 600 ~/.strayhost_claude_token )
    ```
 
-   On Windows PowerShell, the second line is `Read-Host "Paste the token and press Enter" | Set-Content -NoNewline "$HOME\.strayhost_claude_token"`.
-
-3. In terminal 1, stop the console (Ctrl+C) and start it with a new state folder, so that it shows only your run:
+4. In Terminal window 1, stop the console (Ctrl+C) and start it with a new state folder, so that it shows only your run:
 
    ```sh
    python3 run.py console --routing examples/routing.json --data console_claude
    ```
 
-4. In terminal 2, run StrayHost with Claude and score it:
+5. In Terminal window 2, set the back end, the token file and the model, then run StrayHost and score the result:
 
    ```sh
    export STRAYHOST_LLM_BACKEND=claude-cli
    export STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
-   python3 run.py run --input examples/demo --out out_claude --webhook http://127.0.0.1:8765/hook
-   python3 run.py score --assets out_claude/assets.json --truth examples/demo/truth.csv
+   export STRAYHOST_CLAUDE_MODEL=claude-haiku-4-5-20251001
+   python3 run.py run --input examples/demo --out out_haiku --webhook http://127.0.0.1:8765/hook
+   python3 run.py score --assets out_haiku/assets.json --truth examples/demo/truth.csv
    ```
 
-   On Windows PowerShell, the two `export` lines are `$env:STRAYHOST_LLM_BACKEND="claude-cli"` and `$env:STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE="$HOME\.strayhost_claude_token"`.
+   The first line of the output must be:
 
-   Matching takes 5 requests (2 for candidate pairs, 3 for look-alikes) and each Critical alert text one more; in the recorded run this took about 11 minutes in total. LLM answers vary from run to run, so your numbers can differ slightly from the recorded run.
+   ```text
+   [info] LLM mode: ClaudeCLIClient(model='claude-haiku-4-5-20251001', effort='low'). Every combination of records is decided by the LLM.
+   ```
 
-If the run stops at once: "the `claude` command was not found" means the CLI is not on your PATH (set `STRAYHOST_CLAUDE_BIN` to its full path); "Unset these variables first" means an API key such as `ANTHROPIC_API_KEY` is set in your shell, which StrayHost refuses so that nothing is billed to an API account.
+   Matching takes 5 requests in the recorded run (2 for pairs that share an identifier, 3 for look-alikes), and each Critical alert text one more; the whole run took about 11 minutes. `export` applies to the current Terminal window only: in a new window, run the three `export` lines again.
+
+If the run stops at once: "the `claude` command was not found" means the CLI is not on your PATH (set `STRAYHOST_CLAUDE_BIN` to its full path, which `type claude` shows); "Unset these variables first" means one of the variables in item 2 is set; "must contain a subscription token" means the token file holds something other than a token from `claude setup-token`.
+
+### Step 6: run it with Claude Opus
+
+Repeat item 5 of Step 5 with an Opus model and a new output folder:
+
+```sh
+export STRAYHOST_CLAUDE_MODEL=claude-opus-5-5
+python3 run.py run --input examples/demo --out out_opus --webhook http://127.0.0.1:8765/hook
+python3 run.py score --assets out_opus/assets.json --truth examples/demo/truth.csv
+```
+
+The first line of the output must show `model='claude-opus-5-5'`. Use the full model name, not the short names `opus` or `haiku`: Claude Code points these short names to the newest model, which changes over time (`haiku` no longer means Haiku 4.5). Which models you can use depends on your plan, and Opus uses up the plan's usage limit faster than Haiku. StrayHost passes `--effort low` to the CLI (`STRAYHOST_CLAUDE_EFFORT`). Claude Code supports effort levels on Opus models but not on Haiku 4.5. The numbers in this README were measured with Haiku 4.5; runs with Opus have not been evaluated.
+
+### What gives the same result every time
+
+- Steps 3 and 4 give exactly the numbers shown above on any computer: Step 3 reads saved results, and Step 4 uses no LLM.
+- Steps 5 and 6 ask an LLM. The prompts, the way pairs are split into requests and the rule for combining records are fixed, but StrayHost cannot fix the LLM's sampling (there is no temperature or seed setting in the Claude Code CLI), so answers and numbers can differ from run to run and from the recorded run. The number of look-alike pairs in the second step can also change, because it depends on the first step's answers.
+- Every run keeps its LLM judgements in `llm_adjudications.jsonl` in its `--out` folder, and `score` on a saved folder gives the same numbers every time. Keep the folder of a run to check its numbers later, as Step 3 does for the recorded run.
 
 ## Demo result (one run, Claude Haiku 4.5 via the Claude CLI)
 
-On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository (English matching prompt). LLM answers vary from run to run, so another run can give slightly different numbers. The files of this run are in `examples/demo/recorded_run/` (Step 2).
+On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in cases C, D, G, 3 of them look-alike decoys; synthetic), with the code in this repository (English matching prompt). LLM answers vary from run to run, so another run can give slightly different numbers. The files of this run are in `examples/demo/recorded_run/` (Step 3).
 
 | | Rules only (baseline) | StrayHost (LLM decides every combination) |
 |---|---|---|
@@ -170,7 +244,7 @@ Of the 6 remaining imperfect alerts, 5 are also imperfect in the baseline. 3 com
 
 ## Choosing the LLM
 
-**Claude with your subscription (Claude Code CLI, no API billing):** set up as in Step 4. The model is `STRAYHOST_CLAUDE_MODEL` (default `claude-haiku-4-5-20251001`). StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock/Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI confirms it is using the subscription. The CLI runs without tools, MCP servers or your settings, with only a few environment variables (PATH, proxy and certificate settings). Tested with the real Claude CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
+**Claude with your subscription (Claude Code CLI, no API billing):** set up as in Step 5. The model is `STRAYHOST_CLAUDE_MODEL` (default `claude-haiku-4-5-20251001`; Step 6 shows how to use Opus). StrayHost refuses to start if `ANTHROPIC_API_KEY` (or Bedrock/Vertex settings) is set, accepts only subscription tokens (`sk-ant-oat…`) in the token file, and stops unless the CLI confirms it is using the subscription. The CLI runs without tools, MCP servers or your settings, with only a few environment variables (PATH, proxy and certificate settings). Tested with the real Claude CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
 
 **Any OpenAI-compatible endpoint** (OpenAI, Gemini, Ollama, vLLM, LM Studio):
 

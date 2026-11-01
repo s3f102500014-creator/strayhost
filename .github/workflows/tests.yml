@@ -22,7 +22,7 @@ jobs:
         if: failure()
         shell: bash
         run: grep -A20 -E "^(FAIL|ERROR):" test.log | head -80 | sed 's/^/::error::/'
-      - name: README steps 1-3 (console, recorded run, rules-only baseline)
+      - name: README steps 2-4 (console, recorded run, rules-only baseline)
         shell: bash
         run: |
           set -e

@@ -1,6 +1,6 @@
 # StrayHost Tool Guide
 
-StrayHost 0.1.0 · MIT License · Izuru Aki (Toyo University) · https://github.com/s3f102500014-creator/strayhost
+StrayHost 0.1.1 · MIT License · Izuru Aki (Toyo University) · https://github.com/s3f102500014-creator/strayhost
 
 ## 1. Description
 
@@ -48,14 +48,14 @@ See `CHANGELOG.md`. Version 0.1.0 (2026-10-19) is the first release.
 - Python 3.10 or later. No packages to install (`requirements.txt` lists none).
 - A web browser for the console.
 - For LLM matching, one of:
-  - a Claude Pro, Max, Team or Enterprise plan and the Claude Code CLI (section 2.3);
+  - a Claude Pro, Max, Team or Enterprise plan and the Claude Code CLI (section 2.4);
   - an OpenAI-compatible endpoint (for example OpenAI, Gemini, vLLM or LM Studio) and its key;
   - a local model server with an OpenAI-compatible API (for example Ollama).
 - Without an LLM, StrayHost runs a rules-only baseline (records sharing any identifier are combined without review).
 
 ### 2.2 Supported platforms
 
-The automated tests (65 tests) and the README steps 1–3 run in GitHub Actions on Windows, macOS and Linux with Python 3.10 and 3.13. The Claude CLI back end has been tested with the real CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
+The automated tests (65 tests) and the README steps 2–4 run in GitHub Actions on Windows, macOS and Linux with Python 3.10 and 3.13. The Claude CLI back end has been tested with the real CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
 
 ### 2.3 Get the code
 
