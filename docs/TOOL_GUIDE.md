@@ -4,9 +4,9 @@ StrayHost 0.1.1 · MIT License · Izuru Aki (Toyo University) · https://github.
 
 ## 1. Description
 
-StrayHost reconciles three asset inventories that most organisations already export — the asset ledger (CMDB), the EDR console and an external attack-surface scan (ASM) — and reports the machines that are missing from one of them, for example a host that is reachable from the Internet but is in neither the ledger nor the EDR.
+StrayHost cross-checks the records of several security products and notifies the SOC of machines by risk level. It currently reads CSV exports of three types of product: asset management (the asset ledger or CMDB), EDR and external attack-surface management (ASM). It reports the machines that some of them do not cover, for example a host that is reachable from the Internet but is in neither the ledger nor the EDR.
 
-The three lists rarely agree: the same machine appears under different name spellings, receives a new IP after a DHCP renewal, or shares one public address with other machines behind NAT. Combining records by matching identifiers fails in two ways. If matching is too strict, name variants become false "unmanaged host" alerts. If it is too loose, an unmanaged host is merged into a managed one and its alert disappears.
+The records of the three products rarely agree: the same machine appears under different name spellings, receives a new IP after a DHCP renewal, or shares one public address with other machines behind NAT. Combining records by matching identifiers fails in two ways. If matching is too strict, name variants become false "unmanaged host" alerts. If it is too loose, an unmanaged host is merged into a managed one and its alert disappears.
 
 StrayHost applies one rule: **no merge without a reason**. Records that share an identifier are only candidates; a large language model (LLM) judges every candidate pair and gives a reason, and records are combined only when the LLM answers "same device" with confidence 0.5 or more. Unsure, malformed or failed answers keep the records apart, so an error adds an alert instead of hiding one.
 

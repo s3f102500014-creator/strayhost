@@ -1,10 +1,8 @@
 # StrayHost
 
-**Three inventories. One cross-examination. The hosts nobody owns.**
+StrayHost cross-checks the records of several security products and notifies the SOC of machines by risk level. It currently reads CSV exports of three types of product: asset management (the asset ledger or CMDB), EDR and external attack-surface management (ASM). Each of these products is useful for its own purpose, but none of them was built to compare its records with the others and find the machines that any of them fails to cover, such as a test server that a developer exposed to the Internet and that is in neither the ledger nor the EDR.
 
-Every organisation has three lists of its machines: the asset ledger (CMDB), the EDR console and an external attack-surface scan (ASM). Each one is "green". The machine an attacker will use is the one that is missing from one of them — exposed to the Internet, but not in the ledger and not running an EDR agent.
-
-Finding it means reconciling the three lists, and they never agree: `WKS-C06F3` in one, `wks-c06f3-01.corp.local` in another, a different IP after a DHCP renewal, a public address behind NAT. StrayHost reads the three exports, lets an LLM decide which records are the same machine, classifies every asset by which lists it appears in, and **notifies you about the stray hosts — with the evidence**.
+The records of one machine are often written differently in each product: `WKS-C06F3` in one, `wks-c06f3-01.corp.local` in another, a different IP address after a DHCP renewal, a public address behind NAT. StrayHost builds candidate pairs of records, an LLM decides which records belong to the same machine and gives a reason, each machine is classified by which products have a record of it, and the machines at risk are sent as alerts with the records behind them.
 
 > **Status:** research prototype. Bundled data is synthetic (generated). No accuracy claim is made for real networks.
 
@@ -13,9 +11,9 @@ Finding it means reconciling the three lists, and they never agree: `WKS-C06F3` 
 Automatic reconciliation fails in two ways:
 
 - **Too strict:** name variants are treated as different machines. You get a flood of false "unmanaged host" alerts.
-- **Too loose:** a stray host is merged into a managed machine with a similar name. **Its alert disappears.** In asset reconciliation, a wrong merge is a missed detection.
+- **Too loose:** a stray host is merged into a managed machine with a similar name. Its alert disappears. In asset reconciliation, a wrong merge is a missed detection.
 
-Even "obvious" matches fail: a replaced machine inherits the old hostname, devices behind NAT share one public IP, `www.a.example` and `www.b.example` share a first label. So in StrayHost **nothing is combined unless the LLM confirmed it, with a reason**, and every doubt falls on the side that keeps a possible stray host visible:
+Even "obvious" matches fail: a replaced machine inherits the old hostname, devices behind NAT share one public IP, `www.a.example` and `www.b.example` share a first label. So in StrayHost nothing is combined unless the LLM confirmed it, with a reason, and when the LLM is unsure, the records are kept apart, so that a possible stray host stays visible:
 
 | Rule | Why |
 |---|---|
@@ -33,7 +31,7 @@ The matching prompt tells the model to answer "different" when the evidence is b
 1. **Read** `ledger.csv`, `edr.csv`, `asm.csv`.
 2. **Find candidates:** pairs of records that share an asset ID, hostname (ignoring case and domain) or IP address.
 3. **Let the LLM decide** each candidate pair, then the look-alike groups (as above). Only confirmed pairs are combined.
-4. **Classify** each asset by the lists it appears in (no LLM):
+4. **Classify** each asset by the products that have a record of it (no LLM):
 
 The cases and risk levels are those of the three-way reconciliation matrix in Aki et al., "Triad Integration for IT Asset Governance: AI Agent–Driven Convergence of ITAM, ASM, and EDR" (ICSPIS 2025):
 
@@ -41,17 +39,17 @@ The cases and risk levels are those of the three-way reconciliation matrix in Ak
 |---|:-:|:-:|:-:|---|---|---|
 | A | ✓ | ✓ | ✓ | managed, visible externally (check vulnerabilities) | Important | daily digest |
 | B | ✓ | ✓ | | managed, internal only | Informational | weekly report |
-| **C** | ✓ | | ✓ | **externally visible without EDR (unprotected)** | **Critical** | **immediate alert** |
-| **D** | | ✓ | ✓ | **not in ledger, seen by EDR and externally (shadow IT)** | **Critical** | **immediate alert** |
+| C | ✓ | | ✓ | externally visible without EDR (unprotected) | Critical | immediate alert |
+| D | | ✓ | ✓ | not in ledger, seen by EDR and externally (shadow IT) | Critical | immediate alert |
 | E | ✓ | | | ledger only, not detected (retired or inactive) | Important | daily digest |
 | F | | ✓ | | not in ledger, seen by EDR (unmanaged internal) | Important | daily digest |
-| **G** | | | ✓ | **externally visible only, unknown internally** | **Critical** | **immediate alert** |
+| G | | | ✓ | externally visible only, unknown internally | Critical | immediate alert |
 
 5. **Notify:** one alert per Critical asset (C, D, G), written by the LLM from the observed records and checked; one digest for A, E, F. Send them to any Slack-compatible incoming webhook, or to the built-in console.
 
 ## Console: tickets, routing, escalation, e-mail, reports
 
-`python3 run.py console --routing examples/routing.json` (Step 2 below) starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations of the paper:
+`python3 run.py console --routing examples/routing.json` (Step 2 below) starts a local web console (http://127.0.0.1:8765/) that receives the notifications on `/hook` and runs the operations described in Aki et al. (ICSPIS 2025):
 
 | Situation | What the console does |
 |---|---|
@@ -242,16 +240,16 @@ On the bundled demo data (`examples/demo`, 133 records; 28 high-risk devices in 
 
 | | Rules only (baseline) | StrayHost (LLM decides every combination) |
 |---|---|---|
-| Real high-risk devices with no Critical alert at all (missed) | 1 | **0** |
-| Critical alerts | 37 | **31** |
-| — one correct alert for a real high-risk device | 24 | **25** |
-| — duplicate, wrong device or wrong case | 13 | **6** |
-| Pairwise F1 (precision / recall) | 0.667 (0.885 / 0.535) | **0.911 (1.000 / 0.837)** |
-| Pairs of different devices the LLM called "same" | – | **0 of 46** (113 judgements in total) |
+| Real high-risk devices with no Critical alert at all (missed) | 1 | 0 |
+| Critical alerts | 37 | 31 |
+| — one correct alert for a real high-risk device | 24 | 25 |
+| — duplicate, wrong device or wrong case | 13 | 6 |
+| Pairwise F1 (precision / recall) | 0.667 (0.885 / 0.535) | 0.911 (1.000 / 0.837) |
+| Pairs of different devices the LLM called "same" | – | 0 of 46 (113 judgements in total) |
 | Pairs of the same device left uncombined | – | 10 of 67 (8 judged "different"; 2 judged "same" but not applied because of the 2-group cap in the look-alike step) |
 | Alert texts written by the LLM and passing the check | – | 30 of 31 (the other one contained "8.0-severity", which the check treats as an unknown name, so the template text was sent) |
 
-The case that matters: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is **not in the ledger** (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered *"Both ASM records share only the shared IP address (203.0.114.41), but have completely different domains (shdpub-0dab3 vs pub-bd82f). Shared IP alone is insufficient evidence without other matching identifiers"*, kept them apart, and raised the Critical alert.
+Example: `shdpub-0dab3` is exposed to the Internet, runs EDR, and is not in the ledger (case D). Behind NAT it shares the public address 203.0.114.41 with the managed server `pub-bd82f`. The rules join the two because the IP matches, and the stray host disappears into a managed asset — no Critical alert, just a line in the digest for `pub-bd82f`. StrayHost's LLM answered *"Both ASM records share only the shared IP address (203.0.114.41), but have completely different domains (shdpub-0dab3 vs pub-bd82f). Shared IP alone is insufficient evidence without other matching identifiers"*, kept them apart, and raised the Critical alert.
 
 Of the 6 remaining imperfect alerts, 5 are also imperfect in the baseline. 3 come from old `legacy-` records that the LLM kept separate from the same device (it read the `legacy-` prefix and the different IP as a contradiction), giving a duplicate alert each. In 2, the device's records share no identifier at all (the EDR record has no hostname, or the ASM record has no domain), so neither the rules nor StrayHost has a candidate pair: the device is alerted, but as case G instead of D or C. The sixth is new: an ASM record without a domain matches an EDR record by IP only, and the LLM treated the missing name as a mismatch and kept them apart, so the device is alerted as case G instead of D; the rules had combined this one correctly.
 
@@ -294,7 +292,7 @@ The matching prompt is an English translation of the Japanese prompt used in our
 
 Rename your export's columns to these names; files must be UTF-8. If no identifier column is found the run stops with a message.
 
-## Test it on your own kind of mess
+## Generate other test data
 
 ```sh
 python3 run.py synth --style g1 --n 60 --p 0.2 --out mydata   # clean records + noise: name variants, look-alike decoys, NAT, stale records ... (private addresses seen by ASM are replaced with addresses from documentation ranges)
