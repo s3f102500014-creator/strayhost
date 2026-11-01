@@ -207,9 +207,11 @@ If the run stops at once: "the `claude` command was not found" means the CLI is 
 
 ### Step 6: run it with Claude Opus
 
-Repeat item 5 of Step 5 with an Opus model and a new output folder:
+This step needs items 1–4 of Step 5 (the CLI, no API key in the shell, the token file and the console). Run all of the following in Terminal window 2, in the StrayHost folder. The first two `export` lines are the same as in Step 5; `export` applies to one window only, so run them again in a new window. The third `export` line selects Opus, and the run writes to a new folder, `out_opus`:
 
 ```sh
+export STRAYHOST_LLM_BACKEND=claude-cli
+export STRAYHOST_CLAUDE_OAUTH_TOKEN_FILE=~/.strayhost_claude_token
 export STRAYHOST_CLAUDE_MODEL=claude-opus-5-5
 python3 run.py run --input examples/demo --out out_opus --webhook http://127.0.0.1:8765/hook
 python3 run.py score --assets out_opus/assets.json --truth examples/demo/truth.csv
