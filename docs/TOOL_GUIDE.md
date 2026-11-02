@@ -55,7 +55,7 @@ See `CHANGELOG.md`. Version 0.1.0 (2026-10-19) is the first release.
 
 ### 2.2 Supported platforms
 
-The automated tests (65 tests) and the README steps 2–4 run in GitHub Actions on Windows, macOS and Linux with Python 3.10 and 3.13. The Claude CLI back end has been tested with the real CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
+The automated tests (68 tests) and the README steps 2–4 run in GitHub Actions on Windows, macOS and Linux with Python 3.10 and 3.13. The Claude CLI back end has been tested with the real CLI on macOS; on Linux and Windows only with a stand-in CLI in the tests.
 
 ### 2.3 Get the code
 
